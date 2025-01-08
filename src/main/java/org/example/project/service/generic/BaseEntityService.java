@@ -1,9 +1,11 @@
 package org.example.project.service.generic;
 
 import jakarta.transaction.Transactional;
-import org.example.project.dto.generic.BaseDto;
+import org.example.project.dto.generic.IBaseDtoCreate;
+import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
 import org.example.project.repository.generic.BaseEntityRepository;
+import org.example.project.result.Result;
 import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
 import org.example.project.utils.interfaces.IMapping;
@@ -16,8 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseEntityService<Model extends BaseEntity, Dto extends BaseDto>
-        implements IMapping<Model, Dto>, IAppUtils {
+public abstract class BaseEntityService
+        <Model extends BaseEntity, DtoCreate extends IBaseDtoCreate, DtoUpdate extends IBaseDtoUpdate>
+        implements IMapping<Model, DtoCreate, DtoUpdate>, IAppUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseEntityService.class);
 
     @Autowired
@@ -40,37 +43,51 @@ public abstract class BaseEntityService<Model extends BaseEntity, Dto extends Ba
         return repository.findById(id);
     }
 
-    public Model create(Dto dto) {
+    public Model create(DtoCreate dto) {
         Model databaseEntity = mapToModel(dto);
-        return repository.save(databaseEntity);
-    }
 
-    public Model update(Long id, Dto dto) {
-        Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return null;
-
-        updateFromDto(databaseEntity, dto);
-
+        databaseEntity.setCreatedAt(new Date());
         databaseEntity.setModifiedAt(new Date());
+        databaseEntity.setDeleted(false);
 
         return repository.save(databaseEntity);
     }
 
-    public Model softDelete(Long id) {
+    public Result<Model> update(Long id, DtoUpdate dto) {
+        Result<Model> result = new Result<>();
+
         Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return null;
+        if (databaseEntity == null) return result.entityNotFound("Entity");
+
+        result = updateFromDto(databaseEntity, dto);
+
+        if(result.isSuccess()) {
+            databaseEntity.setModifiedAt(new Date());
+            return result.entityFound(repository.save(databaseEntity));
+        }
+        else
+            return result;
+    }
+
+    public Result<Model>  softDelete(Long id) {
+        Result<Model> result = new Result<>();
+
+        Model databaseEntity = repository.findById(id);
+        if (databaseEntity == null) return result.entityNotFound("Entity");
 
         databaseEntity.setDeleted(true);
         databaseEntity.setModifiedAt(new Date());
 
-        return repository.save(databaseEntity);
+        return result.entityFound(repository.save(databaseEntity));
     }
 
-    public Model delete(Long id) {
+    public Result<Model>  delete(Long id) {
+        Result<Model> result = new Result<>();
+
         Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return null;
+        if (databaseEntity == null) return result.entityNotFound("Entity");
 
         repository.delete(databaseEntity);
-        return databaseEntity;
+        return result.entityFound(databaseEntity);
     }
 }

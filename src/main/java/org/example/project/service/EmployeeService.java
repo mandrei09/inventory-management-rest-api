@@ -1,24 +1,26 @@
 package org.example.project.service;
 
-import org.example.project.dto.EmployeeDto;
+import org.example.project.dto.employee.EmployeeDtoCreate;
+import org.example.project.dto.employee.EmployeeDtoUpdate;
 import org.example.project.model.Employee;
-import org.example.project.repository.EmployeeRepository;
+import org.example.project.repository.ICompanyRepository;
+import org.example.project.repository.IEmployeeRepository;
+import org.example.project.result.Result;
 import org.example.project.service.generic.BaseEntityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class EmployeeService extends BaseEntityService<Employee, EmployeeDto> {
+public class EmployeeService extends BaseEntityService<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> {
 
-    private final EmployeeRepository employeeRepository;
+    private final IEmployeeRepository employeeRepository;
+    private final ICompanyRepository companyRepository;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(IEmployeeRepository employeeRepository, ICompanyRepository companyRepository) {
         super(employeeRepository);
         this.employeeRepository = employeeRepository;
+        this.companyRepository = companyRepository;
     }
 
     public List<Employee> getAll() {
@@ -26,36 +28,70 @@ public class EmployeeService extends BaseEntityService<Employee, EmployeeDto> {
     }
 
     @Override
-    public Employee mapToModel(EmployeeDto dto) {
+    public Employee mapToModel(EmployeeDtoCreate dto) {
         return Employee.builder()
-            .internalCode(trimString(dto.getInternalCode()))
-            .name(trimString(dto.getName()))
-            .lastName(trimString(dto.getLastName()))
-            .email(trimString(dto.getEmail()))
-            .manager(employeeRepository.findById(dto.getManagerId()))
+            .internalCode(trimStringOrNull(dto.getInternalCode()))
+            .name(trimStringOrNull(dto.getName()))
+            .lastName(trimStringOrNull(dto.getLastName()))
+            .email(trimStringOrNull(dto.getEmail()))
+            .manager(employeeRepository.findById(dto.getManagerId()).orElse(null))
             .birthDate(dto.getBirthDate())
             .build();
     }
 
     @Override
-    public EmployeeDto mapToDto(Employee employee) {
-        return EmployeeDto.builder()
+    public EmployeeDtoCreate mapToDto(Employee employee) {
+        return EmployeeDtoCreate.builder()
             .internalCode(employee.getInternalCode())
             .name(employee.getName())
             .lastName(employee.getLastName())
             .email(employee.getEmail())
-            .manager(employee.getManager())
+            .managerId(employee.getManager() != null ? employee.getManager().getId() : null)
+            .companyId(employee.getCompany() != null ? employee.getCompany().getId() : null)
             .birthDate(employee.getBirthDate())
             .build();
     }
 
     @Override
-    public void updateFromDto(Employee employee, EmployeeDto dto) {
-        employee.setInternalCode(trimString(dto.getInternalCode()));
-        employee.setName(trimString(dto.getName()));
-        employee.setLastName(trimString(dto.getLastName()));
-        employee.setEmail(trimString(dto.getEmail()));
-        employee.setManager(dto.getManager());
-        employee.setBirthDate(employee.getBirthDate());
+    public Result<Employee> updateFromDto(Employee employee, EmployeeDtoUpdate dto) {
+        Result<Employee> result = new Result<>();
+
+        if(dto.getInternalCode() != null)
+            employee.setInternalCode(dto.getInternalCode().trim());
+
+        if(dto.getName() != null)
+            employee.setName(dto.getName().trim());
+
+        if(dto.getLastName() != null)
+            employee.setLastName(dto.getLastName().trim());
+
+        if(dto.getEmail() != null)
+            employee.setEmail(dto.getEmail().trim());
+
+        if(dto.getManagerId() != null) {
+            var manager = employeeRepository.findById(dto.getManagerId()).orElse(null);
+            if(manager != null) {
+                employee.setManager(manager);
+            }
+            else {
+                result.entityNotFound("Manager");
+            }
+        }
+
+        if(dto.getCompanyId() != null) {
+            var company = companyRepository.findById(dto.getCompanyId()).orElse(null);
+            if(company != null) {
+                employee.setCompany(company);
+            }
+            else {
+                result.entityNotFound("Company");
+            }
+        }
+
+        if(dto.getBirthDate() != null){
+            employee.setBirthDate(employee.getBirthDate());
+        }
+
+        return result;
     }
 }

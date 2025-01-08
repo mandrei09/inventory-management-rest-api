@@ -1,18 +1,18 @@
 package org.example.project.controller;
 
 import org.example.project.controller.generic.BaseEntityController;
-import org.example.project.dto.EmployeeDto;
+import org.example.project.dto.employee.EmployeeDtoCreate;
+import org.example.project.dto.employee.EmployeeDtoUpdate;
 import org.example.project.model.Employee;
 import org.example.project.service.EmployeeService;
-import org.example.project.service.generic.BaseEntityService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 @Validated
-public class EmployeeController extends BaseEntityController<Employee, EmployeeDto> {
+public class EmployeeController extends BaseEntityController<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> {
 
     private final EmployeeService employeeService;
 

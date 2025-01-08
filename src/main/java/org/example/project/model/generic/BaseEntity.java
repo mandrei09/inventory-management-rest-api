@@ -1,24 +1,25 @@
 package org.example.project.model.generic;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 @MappedSuperclass
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    protected int id;
 
-    private Date createdAt = new Date();
-    private Date modifiedAt = new Date();
-    private boolean isDeleted = Boolean.FALSE;
+    protected Date createdAt = new Date();
+    protected Date modifiedAt = new Date();
+    protected boolean isDeleted = Boolean.FALSE;
 }

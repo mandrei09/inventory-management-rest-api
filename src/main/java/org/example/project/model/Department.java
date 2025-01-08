@@ -1,11 +1,11 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.example.project.model.generic.CodeNameEntity;
 
@@ -17,10 +17,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class Company extends CodeNameEntity {
+public class Department extends CodeNameEntity {
 
     @JsonBackReference
-    @OneToOne
-    @JoinColumn(name = "manager_id")
-    private Employee manager;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }

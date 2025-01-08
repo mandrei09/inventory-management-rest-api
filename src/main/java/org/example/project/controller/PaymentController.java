@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/payments")
 @Validated
 public class PaymentController {
     private final PaymentService paymentService;

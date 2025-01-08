@@ -1,14 +1,11 @@
-package org.example.project.dto;
+package org.example.project.dto.employee;
 
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.project.dto.generic.BaseDto;
-import org.example.project.model.Employee;
+import org.example.project.dto.generic.IBaseDtoCreate;
 
 import java.util.Date;
 
@@ -16,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 @Builder
-public class EmployeeDto extends BaseDto {
+public class EmployeeDtoCreate implements IBaseDtoCreate {
     @NotNull(message = "Internal code cannot be null.")
     private String internalCode;
 
@@ -29,7 +26,10 @@ public class EmployeeDto extends BaseDto {
     @NotNull(message = "Email type cannot be null.")
     private String email;
 
-    private int managerId;
+    private Integer managerId;
+
+    @NotNull(message = "CompanyId cannot be null.")
+    private Integer companyId;
 
     private Date birthDate;
 }

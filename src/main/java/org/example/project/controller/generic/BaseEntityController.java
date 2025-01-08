@@ -1,19 +1,24 @@
 package org.example.project.controller.generic;
 
 import jakarta.validation.Valid;
-import org.example.project.dto.generic.BaseDto;
+import org.example.project.dto.generic.IBaseDtoCreate;
+import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
+import org.example.project.result.Result;
 import org.example.project.service.generic.BaseEntityService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseEntityController<Model extends BaseEntity, Dto extends BaseDto> {
-    private final BaseEntityService<Model, Dto> service;
+public abstract class BaseEntityController
+        <Model extends BaseEntity, DtoCreate extends IBaseDtoCreate, DtoUpdate extends IBaseDtoUpdate> {
 
-    public BaseEntityController(BaseEntityService<Model, Dto> service) {
+    private final BaseEntityService<Model, DtoCreate, DtoUpdate> service;
+
+    public BaseEntityController(BaseEntityService<Model, DtoCreate, DtoUpdate> service) {
         this.service = service;
     }
 
@@ -28,7 +33,7 @@ public abstract class BaseEntityController<Model extends BaseEntity, Dto extends
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Model> create(@RequestBody @Valid Dto dto) {
+    public ResponseEntity<Model> create(@RequestBody @Valid DtoCreate dto) {
         Model createdEntity = service.create(dto);
 
         if (createdEntity != null) {
@@ -44,32 +49,35 @@ public abstract class BaseEntityController<Model extends BaseEntity, Dto extends
     }
 
     @PutMapping("/update/{entityId}")
-    public ResponseEntity<Model> update(@PathVariable Long entityId, @RequestBody @Valid Dto dto) {
-        Model updatedEntity = service.update(entityId, dto);
+    public ResponseEntity<?> update(@PathVariable Long entityId, @RequestBody @Valid DtoUpdate dto) {
+        Result<Model> result = service.update(entityId, dto);
 
-        if (updatedEntity != null) {
-            return ResponseEntity.ok().body(updatedEntity);
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result.getObject());
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result.getMessage() : "Unknown error!");
     }
 
     @PutMapping("/softDelete/{entityId}")
-    public ResponseEntity<Model> softDelete(@PathVariable Long entityId) {
-        Model updatedEntity = service.softDelete(entityId);
+    public ResponseEntity<?> softDelete(@PathVariable Long entityId) {
+        Result<Model> result = service.softDelete(entityId);
 
-        if (updatedEntity != null) {
-            return ResponseEntity.ok().body(updatedEntity);
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result.getObject());
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result.getMessage() : "Unknown error!");
     }
 
     @DeleteMapping("/delete/{entityId}")
-    public ResponseEntity<Model> delete(@PathVariable Long entityId) {
-        Model updatedEntity = service.delete(entityId);
+    public ResponseEntity<?> delete(@PathVariable Long entityId) {
+        Result<Model> result = service.softDelete(entityId);
 
-        if (updatedEntity != null) {
-            return ResponseEntity.ok().body(updatedEntity);
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result.getObject());
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(result != null ? result.getMessage() : "Unknown error!");
     }
 }
