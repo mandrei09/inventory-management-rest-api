@@ -25,4 +25,7 @@ public class Department extends CodeNameEntity {
     @JoinColumn(name = "company_id")
     @Schema(description = "The company to which this department belongs.", example = "TechCorp")
     private Company company;
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Division> divisions;
 }

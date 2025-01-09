@@ -4,12 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.division.DivisionDtoCreate;
 import org.example.project.dto.division.DivisionDtoUpdate;
+import org.example.project.model.Department;
 import org.example.project.model.Division;
+import org.example.project.model.Employee;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.repository.IDivisionRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IDivisionService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,12 +36,21 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
                     @ApiResponse(responseCode = "404", description = "Department not found")
             }
     )
-    public Division mapToModel(DivisionDtoCreate dto) {
-        return Division.builder()
-                .department(departmentRepository.findById(dto.getDepartmentId()))
-                .code(dto.getCode().trim())
-                .name(dto.getName().trim())
-                .build();
+    public Result<Division> mapToModel(DivisionDtoCreate dto) {
+        Result<Division> result = new Result<>();
+
+        Department department = departmentRepository.findById(dto.getDepartmentId());
+        if(department == null) {
+            return result.entityNotFound(ErrorCodes.DEPARTMENT_NOT_FOUND);
+        }
+
+        return result.entityFound(
+            Division.builder()
+                    .department(department)
+                    .code(dto.getCode().trim())
+                    .name(dto.getName().trim())
+                    .build()
+        );
     }
 
     @Override

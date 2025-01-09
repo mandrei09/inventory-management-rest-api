@@ -9,6 +9,7 @@ import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,18 +48,19 @@ public abstract class BaseController
     @Operation(summary = "Create a new entity", description = "Create a new entity based on the provided DTO.")
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody @Valid @Parameter(description = "DTO containing the data to create the new entity") DtoCreate dto) {
-        Model createdEntity = service.create(dto);
+        Result<Model> result = service.create(dto);
 
-        if (createdEntity != null) {
+        if (result != null && result.isSuccess()) {
             var uri = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
-                    .buildAndExpand(createdEntity.getCreatedAt())
+                    .buildAndExpand(result.getObject().getId())
                     .toUri();
 
-            return ResponseEntity.created(uri).body(createdEntity);
+            return ResponseEntity.created(uri).body(result.getObject());
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Update an existing entity", description = "Update an existing entity with the provided DTO by entity ID.")
@@ -72,7 +74,7 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : "Unknown error!");
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Soft delete an entity", description = "Soft delete an entity by ID, marking it as deleted without actually removing it from the database.")
@@ -84,7 +86,7 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : "Unknown error!");
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Delete an entity", description = "Delete an entity permanently by its ID.")
@@ -96,7 +98,7 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : "Unknown error!");
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Clean up entities", description = "Hard delete entities based on a date filter.")
@@ -108,6 +110,6 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject() + " entities deleted!");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : "Unknown error!");
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 }

@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.inventory.InventoryDtoCreate;
 import org.example.project.dto.inventory.InventoryDtoUpdate;
+import org.example.project.model.Company;
 import org.example.project.model.Inventory;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IInventoryService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,15 +32,25 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
             description = "Converts an InventoryDtoCreate object into an Inventory entity.",
             responses = @ApiResponse(responseCode = "200", description = "Successfully mapped DTO to entity")
     )
-    public Inventory mapToModel(InventoryDtoCreate dto) {
-        return Inventory.builder()
-                .company(companyRepository.findById(dto.getCompanyId()))
-                .code(dto.getCode().trim())
-                .name(dto.getName().trim())
-                .info(trimStringOrNull(dto.getInfo()))
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
-                .build();
+    public Result<Inventory> mapToModel(InventoryDtoCreate dto) {
+        Result<Inventory> result = new Result<>();
+
+        Company company = companyRepository.findById(dto.getCompanyId());
+
+        if (company == null) {
+            return result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+        }
+
+        return result.entityFound(
+            Inventory.builder()
+                    .company(company)
+                    .code(dto.getCode().trim())
+                    .name(dto.getName().trim())
+                    .info(trimStringOrNull(dto.getInfo()))
+                    .startDate(dto.getStartDate())
+                    .endDate(dto.getEndDate())
+                    .build()
+        );
     }
 
     @Override
@@ -91,7 +103,7 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
             if (company != null) {
                 inventory.setCompany(company);
             } else {
-                result.entityNotFound("Company not found!");
+                result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
             }
         }
 

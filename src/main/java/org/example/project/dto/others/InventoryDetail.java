@@ -16,7 +16,6 @@ import java.util.List;
 @Data
 @Builder
 public class InventoryDetail {
-    @Schema(description = "The current status of the inventory.", example = "FINISHED")
     private InventoryStatus status;
 
     @Schema(description = "The number of assets scanned in the inventory.", example = "200")

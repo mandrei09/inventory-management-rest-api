@@ -5,10 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.costCenter.CostCenterDtoCreate;
 import org.example.project.dto.costCenter.CostCenterDtoUpdate;
 import org.example.project.model.CostCenter;
+import org.example.project.model.Division;
+import org.example.project.model.Employee;
 import org.example.project.repository.IDivisionRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.ICostCenterService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,12 +34,22 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
                     @ApiResponse(responseCode = "200", description = "CostCenter successfully mapped")
             }
     )
-    public CostCenter mapToModel(CostCenterDtoCreate dto) {
-        return CostCenter.builder()
-                .division(divisionRepository.findById(dto.getDivisionId()))
-                .code(dto.getCode().trim())
-                .name(dto.getName().trim())
-                .build();
+    public Result<CostCenter> mapToModel(CostCenterDtoCreate dto) {
+        Result<CostCenter> result = new Result<>();
+
+        Division division = divisionRepository.findById(dto.getDivisionId());
+
+        if (division == null) {
+            return result.entityNotFound(ErrorCodes.DIVISION_NOT_FOUND);
+        }
+
+        return result.entityFound(
+                CostCenter.builder()
+                        .division(division)
+                        .code(dto.getCode().trim())
+                        .name(dto.getName().trim())
+                        .build()
+        );
     }
 
     @Override

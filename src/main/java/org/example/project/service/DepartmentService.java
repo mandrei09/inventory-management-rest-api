@@ -4,12 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.department.DepartmentDtoCreate;
 import org.example.project.dto.department.DepartmentDtoUpdate;
+import org.example.project.model.Company;
+import org.example.project.model.CostCenter;
 import org.example.project.model.Department;
+import org.example.project.model.Employee;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IDepartmentService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,12 +36,22 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
                     @ApiResponse(responseCode = "200", description = "Department successfully mapped")
             }
     )
-    public Department mapToModel(DepartmentDtoCreate dto) {
-        return Department.builder()
-                .company(companyRepository.findById(dto.getCompanyId()))
+    public Result<Department> mapToModel(DepartmentDtoCreate dto) {
+        Result<Department> result = new Result<>();
+
+        Company company = companyRepository.findById(dto.getCompanyId());
+
+        if (company == null) {
+            return result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+        }
+
+        return result.entityFound(
+            Department.builder()
+                .company(company)
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
-                .build();
+                .build()
+        );
     }
 
     @Override

@@ -13,7 +13,6 @@ import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Date;
@@ -26,7 +25,6 @@ public abstract class BaseService
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
 
-    @Autowired
     private final IBaseEntityRepository<Model> repository;
 
     public BaseService(IBaseEntityRepository<Model> baseEntityRepository) {
@@ -72,14 +70,19 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "400", description = "Invalid input data")
             }
     )
-    public Model create(DtoCreate dto) {
-        Model databaseEntity = mapToModel(dto);
+    public Result<Model> create(DtoCreate dto) {
+        Result<Model> result = mapToModel(dto);
 
-        databaseEntity.setCreatedAt(new Date());
-        databaseEntity.setModifiedAt(new Date());
-        databaseEntity.setDeleted(false);
+        if(result.isSuccess()) {
+            Model databaseEntity = result.getObject();
+            databaseEntity.setCreatedAt(new Date());
+            databaseEntity.setModifiedAt(new Date());
+            databaseEntity.setDeleted(false);
+            repository.save(databaseEntity);
 
-        return repository.save(databaseEntity);
+            result.setObject(databaseEntity);
+        }
+        return result;
     }
 
     @Override

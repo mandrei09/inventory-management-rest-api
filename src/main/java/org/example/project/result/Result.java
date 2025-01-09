@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.project.utils.ErrorCodes;
 
 @Data
 @AllArgsConstructor
@@ -12,13 +13,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Result<T> {
 
-    private final String DEFAULT_ERROR_MESSAGE = "Unknown Error!";
-
     @Schema(description = "Indicates whether the operation was successful.", example = "true")
     protected boolean success = false;
 
     @Schema(description = "Message providing additional information on the result.", example = "Entity found successfully")
-    protected String message = DEFAULT_ERROR_MESSAGE;
+    protected String message = ErrorCodes.UNKNOWN_ERROR;
 
     @Schema(description = "The object returned by the operation, if successful.")
     protected T object = null;
@@ -26,11 +25,11 @@ public class Result<T> {
     @Schema(description = "Sets the result as entity not found with an optional error message.")
     public Result<T> entityNotFound(String errorMessage) {
         if (errorMessage != null) {
-            if (this.message != null && !this.message.equals(DEFAULT_ERROR_MESSAGE)) {
+            if (this.message != null && !this.message.equals(ErrorCodes.UNKNOWN_ERROR)) {
                 this.message += "\n";
             }
 
-            this.message = (this.message.equals(DEFAULT_ERROR_MESSAGE) ? "" : this.message);
+            this.message = (this.message.equals(ErrorCodes.UNKNOWN_ERROR) ? "" : this.message);
         }
 
         this.success = false;

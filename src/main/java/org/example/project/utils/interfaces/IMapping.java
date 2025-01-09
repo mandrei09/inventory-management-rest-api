@@ -6,7 +6,7 @@ import org.example.project.model.generic.BaseEntity;
 import org.example.project.result.Result;
 
 public interface IMapping<Model extends BaseEntity, IDtoCreate extends IBaseDtoCreate, IDtoUpdate extends IBaseDtoUpdate> {
-    Model mapToModel(IDtoCreate dtoCreate);
+    Result<Model> mapToModel(IDtoCreate dtoCreate);
     IDtoCreate mapToDto(Model model);
     Result<Model> updateFromDto(Model model, IDtoUpdate dtoUpdate);
 }

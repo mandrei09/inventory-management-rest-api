@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.company.CompanyDtoCreate;
 import org.example.project.dto.company.CompanyDtoUpdate;
 import org.example.project.model.Company;
+import org.example.project.model.Employee;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.ICompanyService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,12 +36,21 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
                     @ApiResponse(responseCode = "200", description = "Company successfully mapped")
             }
     )
-    public Company mapToModel(CompanyDtoCreate dto) {
-        return Company.builder()
-                .manager(employeeRepository.findById(dto.getManagerId()))
-                .code(dto.getCode().trim())
-                .name(dto.getName().trim())
-                .build();
+    public Result<Company> mapToModel(CompanyDtoCreate dto) {
+        Result<Company> result = new Result<>();
+        Employee manager = employeeRepository.findById(dto.getManagerId());
+
+        if (manager == null) {
+            return result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
+        }
+
+        return result.entityFound(
+            Company.builder()
+                    .manager(manager)
+                    .code(dto.getCode().trim())
+                    .name(dto.getName().trim())
+                    .build()
+        );
     }
 
     @Override

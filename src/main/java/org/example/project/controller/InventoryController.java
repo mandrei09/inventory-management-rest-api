@@ -12,6 +12,7 @@ import org.example.project.model.Inventory;
 import org.example.project.result.Result;
 import org.example.project.service.InventoryAssetService;
 import org.example.project.service.InventoryService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -39,25 +40,26 @@ public class InventoryController extends BaseController<Inventory, InventoryDtoC
     @Override
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody @Valid InventoryDtoCreate inventoryDto) {
-        Inventory createdInventory = inventoryService.create(inventoryDto);
+        Result<Inventory> result = inventoryService.create(inventoryDto);
 
-        if (createdInventory != null) {
+        if (result != null && result.isSuccess()) {
             Result<Integer> assetsInserted =
-                    inventoryAssetService.insertAssetsIntoNewInventory(createdInventory.getId(), inventoryDto.getCompanyId());
+                    inventoryAssetService.insertAssetsIntoNewInventory(result.getObject().getId(), inventoryDto.getCompanyId());
 
             if(assetsInserted.isSuccess()) {
                 var uri = ServletUriComponentsBuilder
                         .fromCurrentRequest()
                         .path("/{id}")
-                        .buildAndExpand(createdInventory.getId())
+                        .buildAndExpand(result.getObject().getId())
                         .toUri();
 
-                return ResponseEntity.created(uri).body(createdInventory);
+                return ResponseEntity.created(uri).body(result);
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(assetsInserted.getMessage());
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Get inventory details", description = "Retrieve detailed information about an active inventory and its associated assets.")

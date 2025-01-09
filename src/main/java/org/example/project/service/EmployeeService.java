@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.employee.EmployeeDtoCreate;
 import org.example.project.dto.employee.EmployeeDtoUpdate;
+import org.example.project.model.Company;
 import org.example.project.model.Employee;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IEmployeeService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,18 +45,39 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             description = "Converts an EmployeeDtoCreate object into an Employee entity.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully mapped DTO to entity"),
-                    @ApiResponse(responseCode = "404", description = "Manager not found")
+                    @ApiResponse(responseCode = "404", description = ErrorCodes.MANAGER_NOT_FOUND)
             }
     )
-    public Employee mapToModel(EmployeeDtoCreate dto) {
-        return Employee.builder()
-                .internalCode(trimStringOrNull(dto.getInternalCode()))
-                .name(trimStringOrNull(dto.getName()))
-                .lastName(trimStringOrNull(dto.getLastName()))
-                .email(trimStringOrNull(dto.getEmail()))
-                .manager(employeeRepository.findById(dto.getManagerId()))
-                .birthDate(dto.getBirthDate())
-                .build();
+    public Result<Employee> mapToModel(EmployeeDtoCreate dto) {
+        Result<Employee> result = new Result<>();
+        result.setSuccess(true);
+
+        Employee manager = employeeRepository.findById(dto.getManagerId());
+
+        if (manager == null) {
+            result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
+        }
+
+        Company company = companyRepository.findById(dto.getCompanyId());
+
+        if (company == null) {
+            result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+        }
+
+        if(!result.isSuccess())
+            return result;
+
+        return result.entityFound(
+            Employee.builder()
+                    .internalCode(trimStringOrNull(dto.getInternalCode()))
+                    .name(trimStringOrNull(dto.getName()))
+                    .lastName(trimStringOrNull(dto.getLastName()))
+                    .email(trimStringOrNull(dto.getEmail()))
+                    .manager(manager)
+                    .company(company)
+                    .birthDate(dto.getBirthDate())
+                    .build()
+            );
     }
 
     @Override
@@ -106,7 +129,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             if (manager != null) {
                 employee.setManager(manager);
             } else {
-                result.entityNotFound("Manager not found!");
+                result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
             }
         }
 
@@ -115,7 +138,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             if (company != null) {
                 employee.setCompany(company);
             } else {
-                result.entityNotFound("Company not found!");
+                result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
             }
         }
 

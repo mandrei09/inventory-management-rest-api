@@ -8,6 +8,7 @@ import org.example.project.dto.inventoryAsset.InventoryAssetDtoUpdate;
 import org.example.project.dto.others.InventoryDetail;
 import org.example.project.dto.others.ScanAssetDtoCreate;
 import org.example.project.model.Asset;
+import org.example.project.model.CostCenter;
 import org.example.project.model.Inventory;
 import org.example.project.model.InventoryAsset;
 import org.example.project.model.embedable.InventoryAssetId;
@@ -18,6 +19,7 @@ import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IInventoryAssetService;
+import org.example.project.utils.ErrorCodes;
 import org.example.project.utils.InventoryStatus;
 import org.springframework.stereotype.Service;
 
@@ -48,15 +50,45 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
             description = "Converts an InventoryAssetDtoCreate object into an InventoryAsset entity.",
             responses = @ApiResponse(responseCode = "200", description = "Successfully mapped DTO to entity")
     )
-    public InventoryAsset mapToModel(InventoryAssetDtoCreate dto) {
-        return InventoryAsset.builder()
-                .inventory(inventoryRepository.findById(dto.getInventoryId()))
-                .asset(assetRepository.findById(dto.getAssetId()))
-                .costCenterInitial(costCenterRepository.findById(dto.getCostCenterInitialId()))
-                .costCenterFinal(costCenterRepository.findById(dto.getCostCenterFinalId()))
-                .quantityInitial(dto.getQuantityInitial())
-                .quantityFinal(dto.getQuantityFinal())
-            .build();
+    public Result<InventoryAsset> mapToModel(InventoryAssetDtoCreate dto) {
+        Result<InventoryAsset> result = new Result<>();
+        result.setSuccess(true);
+
+        Inventory inventory = inventoryRepository.findById(dto.getInventoryId());
+        if(inventory == null) {
+            result.entityNotFound(ErrorCodes.INVENTORY_NOT_FOUND);
+        }
+
+        Asset asset = assetRepository.findById(dto.getAssetId());
+        if(asset == null) {
+            result.entityNotFound(ErrorCodes.ASSET_NOT_FOUND);
+        }
+
+        CostCenter costCenterInitial = costCenterRepository.findById(dto.getCostCenterInitialId());
+
+        if (costCenterInitial == null) {
+            return result.entityNotFound(ErrorCodes.COST_CENTER_INITIAL_NOT_FOUND);
+        }
+
+        CostCenter costCenterFinal = costCenterRepository.findById(dto.getCostCenterFinalId());
+
+        if (costCenterFinal == null) {
+            return result.entityNotFound(ErrorCodes.COST_CENTER_FINAL_NOT_FOUND);
+        }
+
+        if(!result.isSuccess())
+            return result;
+
+        return result.entityFound(
+            InventoryAsset.builder()
+                    .inventory(inventory)
+                    .asset(asset)
+                    .costCenterInitial(costCenterInitial)
+                    .costCenterFinal(costCenterFinal)
+                    .quantityInitial(dto.getQuantityInitial())
+                    .quantityFinal(dto.getQuantityFinal())
+                    .build()
+        );
     }
 
     @Override

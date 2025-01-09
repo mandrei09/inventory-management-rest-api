@@ -23,7 +23,7 @@ public class Asset extends CodeNameEntity {
     private Double value;
 
     @JsonBackReference
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "cost_center_id")
     @Schema(description = "The cost center associated with the asset.")
     private CostCenter costCenter;

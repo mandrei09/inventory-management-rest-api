@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.example.project.model.generic.CodeNameEntity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -35,4 +36,8 @@ public class CostCenter extends CodeNameEntity {
     )
     @Schema(description = "The employees assigned to this cost center.")
     private Set<Employee> employees = new HashSet<>();
+
+    @OneToMany(mappedBy = "costCenter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Asset> assets;
+
 }

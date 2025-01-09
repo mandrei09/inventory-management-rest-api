@@ -2,10 +2,7 @@ package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.example.project.model.generic.CodeNameEntity;
@@ -25,4 +22,7 @@ public class Company extends CodeNameEntity {
     @JoinColumn(name = "manager_id")
     @Schema(description = "The manager of the company.", example = "John Doe")
     private Employee manager;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Department> departments;
 }

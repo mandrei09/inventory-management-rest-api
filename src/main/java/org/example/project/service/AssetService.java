@@ -6,11 +6,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.asset.AssetDtoCreate;
 import org.example.project.dto.asset.AssetDtoUpdate;
 import org.example.project.model.Asset;
+import org.example.project.model.CostCenter;
+import org.example.project.model.Employee;
 import org.example.project.repository.IAssetRepository;
 import org.example.project.repository.ICostCenterRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IAssetService;
+import org.example.project.utils.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,14 +38,23 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
                     @ApiResponse(responseCode = "200", description = "Asset successfully mapped")
             }
     )
-    public Asset mapToModel(AssetDtoCreate dto) {
-        return Asset.builder()
-                .costCenter(costCenterRepository.findById(dto.getCostCenterId()))
+    public Result<Asset> mapToModel(AssetDtoCreate dto) {
+        Result<Asset> result = new Result<>();
+        CostCenter costCenter = costCenterRepository.findById(dto.getCostCenterId());
+
+        if (costCenter == null) {
+            return result.entityNotFound(ErrorCodes.COST_CENTER_NOT_FOUND);
+        }
+
+        return result.entityFound(
+            Asset.builder()
+                .costCenter(costCenter)
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
                 .value(dto.getValue())
                 .acquisitionDate(dto.getAcquisitionDate())
-                .build();
+                .build()
+        );
     }
 
     @Override
