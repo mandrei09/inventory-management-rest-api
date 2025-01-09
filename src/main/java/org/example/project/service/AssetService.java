@@ -1,5 +1,8 @@
 package org.example.project.service;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.asset.AssetDtoCreate;
 import org.example.project.dto.asset.AssetDtoUpdate;
 import org.example.project.model.Asset;
@@ -25,6 +28,13 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
     }
 
     @Override
+    @Operation(
+            summary = "Map AssetDtoCreate to Asset",
+            description = "Maps an AssetDtoCreate object to an Asset model object.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Asset successfully mapped")
+            }
+    )
     public Asset mapToModel(AssetDtoCreate dto) {
         return Asset.builder()
                 .costCenter(costCenterRepository.findById(dto.getCostCenterId()))
@@ -32,10 +42,17 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
                 .name(dto.getName().trim())
                 .value(dto.getValue())
                 .acquisitionDate(dto.getAcquisitionDate())
-            .build();
+                .build();
     }
 
     @Override
+    @Operation(
+            summary = "Map Asset to AssetDtoCreate",
+            description = "Maps an Asset model object to an AssetDtoCreate object.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Asset successfully mapped to DTO")
+            }
+    )
     public AssetDtoCreate mapToDto(Asset asset) {
         return AssetDtoCreate.builder()
                 .costCenterId(asset.getCostCenter() != null ? asset.getCostCenter().getId() : null)
@@ -43,10 +60,18 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
                 .name(asset.getName().trim())
                 .value(asset.getValue())
                 .acquisitionDate(asset.getAcquisitionDate())
-            .build();
+                .build();
     }
 
     @Override
+    @Operation(
+            summary = "Update Asset from DTO",
+            description = "Updates an Asset entity based on the provided AssetDtoUpdate object.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Asset successfully updated"),
+                    @ApiResponse(responseCode = "404", description = "Cost center not found")
+            }
+    )
     public Result<Asset> updateFromDto(Asset asset, AssetDtoUpdate dto) {
         Result<Asset> result = new Result<>();
 
@@ -59,11 +84,11 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
         }
 
         if(dto.getValue() != null) {
-            asset.setValue(asset.getValue());
+            asset.setValue(dto.getValue());
         }
 
         if(dto.getAcquisitionDate() != null) {
-            asset.setAcquisitionDate(asset.getAcquisitionDate());
+            asset.setAcquisitionDate(dto.getAcquisitionDate());
         }
 
         if(dto.getCostCenterId() != null) {
@@ -80,7 +105,15 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
     }
 
     @Override
-    public List<Asset> findAllByCompanyId(Long companyId) {
+    @Operation(
+            summary = "Find all Assets by Company ID",
+            description = "Retrieves a list of assets associated with a specific company, excluding deleted assets.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of assets found"),
+                    @ApiResponse(responseCode = "404", description = "No assets found for the given company ID")
+            }
+    )
+    public List<Asset> findAllByCompanyId(@Parameter(description = "Company ID to find assets by") Long companyId) {
         return assetRepository.findAllByCompanyIdAndIsDeletedFalse(companyId);
     }
 }

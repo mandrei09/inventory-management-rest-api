@@ -1,16 +1,16 @@
 package org.example.project.repository;
 
 import org.example.project.model.InventoryAsset;
-import org.example.project.repository.generic.BaseEntityRepository;
+import org.example.project.repository.generic.IBaseEntityRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
 
-public interface IInventoryAssetRepository extends BaseEntityRepository<InventoryAsset> {
+public interface IInventoryAssetRepository extends IBaseEntityRepository<InventoryAsset> {
 
-    InventoryAsset findByInventoryIdAnAssetId(Long inventoryId, Long assetId);
+    InventoryAsset findByInventoryIdAndAssetId(Long inventoryId, Long assetId);
 
     @Query("""
     SELECT ia FROM InventoryAsset ia\s

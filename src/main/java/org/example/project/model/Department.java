@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,5 +23,6 @@ public class Department extends CodeNameEntity {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "company_id")
+    @Schema(description = "The company to which this department belongs.", example = "TechCorp")
     private Company company;
 }

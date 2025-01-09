@@ -7,6 +7,4 @@ import org.example.project.service.generic.IBaseService;
 import org.springframework.data.jpa.repository.Query;
 
 public interface IInventoryService extends IBaseService<Inventory, InventoryDtoCreate, InventoryDtoUpdate> {
-    Long getLastInventoryIdByCompanyId(Long companyId);
-    Inventory findById(Long id);
 }

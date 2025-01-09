@@ -1,10 +1,13 @@
 package org.example.project.service.generic;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.example.project.dto.generic.IBaseDtoCreate;
 import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
-import org.example.project.repository.generic.BaseEntityRepository;
+import org.example.project.repository.generic.IBaseEntityRepository;
 import org.example.project.result.Result;
 import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
@@ -19,32 +22,56 @@ import java.util.Map;
 
 public abstract class BaseService
         <Model extends BaseEntity, DtoCreate extends IBaseDtoCreate, DtoUpdate extends IBaseDtoUpdate>
-        implements IBaseService<Model, DtoCreate, DtoUpdate>, IAppUtils{
+        implements IBaseService<Model, DtoCreate, DtoUpdate>, IAppUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
 
     @Autowired
-    private final BaseEntityRepository<Model> repository;
+    private final IBaseEntityRepository<Model> repository;
 
-    public BaseService(BaseEntityRepository<Model> baseEntityRepository) {
+    public BaseService(IBaseEntityRepository<Model> baseEntityRepository) {
         this.repository = baseEntityRepository;
     }
 
     @Override
     @Transactional()
-    public List<Model> findEntitiesByFilters(Map<String, String> filters) {
+    @Operation(
+            summary = "Find entities by filters",
+            description = "Retrieves a list of entities based on the specified filters.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of entities found"),
+                    @ApiResponse(responseCode = "400", description = "Invalid filter parameters")
+            }
+    )
+    public List<Model> findEntitiesByFilters(@Parameter(description = "Map of filter parameters") Map<String, String> filters) {
         if(filters != null && !filters.isEmpty()) {
             return repository.findAll(
-                Specification.where(GenericSpecification.getQueryableAnd(filters)));
+                    Specification.where(GenericSpecification.getQueryableAnd(filters)));
         }
         return repository.findAllByIsDeletedFalse().toList();
     }
 
-    public Model findById(Long id) {
+    @Operation(
+            summary = "Find an entity by ID",
+            description = "Finds and returns an entity by its unique identifier.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entity found"),
+                    @ApiResponse(responseCode = "404", description = "Entity not found")
+            }
+    )
+    public Model findById(@Parameter(description = "ID of the entity") Long id) {
         return repository.findById(id);
     }
 
     @Override
+    @Operation(
+            summary = "Create a new entity",
+            description = "Creates a new entity from the provided DTO and stores it in the database.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Entity created successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data")
+            }
+    )
     public Model create(DtoCreate dto) {
         Model databaseEntity = mapToModel(dto);
 
@@ -56,6 +83,14 @@ public abstract class BaseService
     }
 
     @Override
+    @Operation(
+            summary = "Create an entity from a model",
+            description = "Creates a new entity from a given model and saves it to the database.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Entity created successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data")
+            }
+    )
     public Model create(Model model) {
         model.setCreatedAt(new Date());
         model.setModifiedAt(new Date());
@@ -65,6 +100,14 @@ public abstract class BaseService
     }
 
     @Override
+    @Operation(
+            summary = "Update an existing entity",
+            description = "Updates an existing entity based on the provided DTO and ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entity updated successfully"),
+                    @ApiResponse(responseCode = "404", description = "Entity not found")
+            }
+    )
     public Result<Model> update(Long id, DtoUpdate dto) {
         Result<Model> result = new Result<>();
 
@@ -82,6 +125,14 @@ public abstract class BaseService
     }
 
     @Override
+    @Operation(
+            summary = "Soft delete an entity",
+            description = "Marks an entity as deleted without removing it from the database.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entity soft-deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Entity not found")
+            }
+    )
     public Result<Model> softDelete(Long id) {
         Result<Model> result = new Result<>();
 
@@ -95,6 +146,14 @@ public abstract class BaseService
     }
 
     @Override
+    @Operation(
+            summary = "Delete an entity",
+            description = "Permanently deletes an entity from the database.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entity deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Entity not found")
+            }
+    )
     public Result<Model> delete(Long id) {
         Result<Model> result = new Result<>();
 
@@ -106,7 +165,15 @@ public abstract class BaseService
     }
 
     @Override
-    public Result<Integer> cleanUp(Date dateAfter) {
+    @Operation(
+            summary = "Clean up soft-deleted entities",
+            description = "Deletes entities that are marked as deleted and were created before the specified date.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entities cleaned up successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid date provided")
+            }
+    )
+    public Result<Integer> cleanUp(@Parameter(description = "Date after which to clean up entities") Date dateAfter) {
         Result<Integer> result = new Result<>();
 
         if(dateAfter == null) dateAfter = new Date();

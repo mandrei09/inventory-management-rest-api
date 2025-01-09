@@ -1,5 +1,8 @@
 package org.example.project.service;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.inventoryAsset.InventoryAssetDtoCreate;
 import org.example.project.dto.inventoryAsset.InventoryAssetDtoUpdate;
 import org.example.project.dto.others.InventoryDetail;
@@ -7,51 +10,61 @@ import org.example.project.dto.others.ScanAssetDtoCreate;
 import org.example.project.model.Asset;
 import org.example.project.model.Inventory;
 import org.example.project.model.InventoryAsset;
+import org.example.project.model.embedable.InventoryAssetId;
+import org.example.project.repository.IAssetRepository;
+import org.example.project.repository.ICostCenterRepository;
 import org.example.project.repository.IInventoryAssetRepository;
+import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
-import org.example.project.service.interfaces.IAssetService;
-import org.example.project.service.interfaces.ICostCenterService;
 import org.example.project.service.interfaces.IInventoryAssetService;
-import org.example.project.service.interfaces.IInventoryService;
 import org.example.project.utils.InventoryStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class InventoryAssetService extends BaseService<InventoryAsset, InventoryAssetDtoCreate, InventoryAssetDtoUpdate> implements IInventoryAssetService {
 
     private final IInventoryAssetRepository inventoryAssetRepository;
-    private final IInventoryService inventoryService;
-    private final IAssetService assetService;
-    private final ICostCenterService costCenterService;
+    private final IInventoryRepository inventoryRepository;
+    private final IAssetRepository assetRepository;
+    private final ICostCenterRepository costCenterRepository;
 
-    public InventoryAssetService(IInventoryAssetRepository inventoryAssetRepository, IInventoryService inventoryService,
-                                 IAssetService assetService, ICostCenterService costCenterService) {
+    public InventoryAssetService(IInventoryAssetRepository inventoryAssetRepository, IInventoryRepository inventoryRepository,
+                                 IAssetRepository assetRepository, ICostCenterRepository costCenterService) {
         super(inventoryAssetRepository);
         this.inventoryAssetRepository = inventoryAssetRepository;
-        this.inventoryService = inventoryService;
-        this.assetService = assetService;
-        this.costCenterService = costCenterService;
+        this.inventoryRepository = inventoryRepository;
+        this.assetRepository = assetRepository;
+        this.costCenterRepository = costCenterService;
     }
 
     @Override
+    @Operation(
+            summary = "Map InventoryAssetDtoCreate to InventoryAsset",
+            description = "Converts an InventoryAssetDtoCreate object into an InventoryAsset entity.",
+            responses = @ApiResponse(responseCode = "200", description = "Successfully mapped DTO to entity")
+    )
     public InventoryAsset mapToModel(InventoryAssetDtoCreate dto) {
         return InventoryAsset.builder()
-                .inventory(inventoryService.findById(dto.getInventoryId()))
-                .asset(assetService.findById(dto.getAssetId()))
-                .costCenterInitial(costCenterService.findById(dto.getCostCenterInitialId()))
-                .costCenterFinal(costCenterService.findById(dto.getCostCenterFinalId()))
+                .inventory(inventoryRepository.findById(dto.getInventoryId()))
+                .asset(assetRepository.findById(dto.getAssetId()))
+                .costCenterInitial(costCenterRepository.findById(dto.getCostCenterInitialId()))
+                .costCenterFinal(costCenterRepository.findById(dto.getCostCenterFinalId()))
                 .quantityInitial(dto.getQuantityInitial())
                 .quantityFinal(dto.getQuantityFinal())
             .build();
     }
 
     @Override
+    @Operation(
+            summary = "Map InventoryAsset to InventoryAssetDtoCreate",
+            description = "Converts an InventoryAsset entity into an InventoryAssetDtoCreate object.",
+            responses = @ApiResponse(responseCode = "200", description = "Successfully mapped entity to DTO")
+    )
     public InventoryAssetDtoCreate mapToDto(InventoryAsset inventoryAsset) {
         return InventoryAssetDtoCreate.builder()
                 .inventoryId(inventoryAsset.getInventory() != null ? inventoryAsset.getInventory().getId() : null)
@@ -64,11 +77,19 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
     }
 
     @Override
+    @Operation(
+            summary = "Update InventoryAsset from DTO",
+            description = "Updates an existing InventoryAsset entity using an InventoryAssetDtoUpdate object.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully updated the entity"),
+                    @ApiResponse(responseCode = "404", description = "Related entities not found")
+            }
+    )
     public Result<InventoryAsset> updateFromDto(InventoryAsset inventoryAsset, InventoryAssetDtoUpdate dto) {
         Result<InventoryAsset> result = new Result<>();
 
         if(dto.getInventoryId() != null) {
-            var inventory = inventoryService.findById(dto.getInventoryId());
+            var inventory = inventoryRepository.findById(dto.getInventoryId());
             if(inventory != null) {
                 inventoryAsset.setInventory(inventory);
             }
@@ -78,7 +99,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         }
 
         if(dto.getAssetId() != null) {
-            var asset = assetService.findById(dto.getAssetId());
+            var asset = assetRepository.findById(dto.getAssetId());
             if(asset != null) {
                 inventoryAsset.setAsset(asset);
             }
@@ -88,7 +109,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         }
 
         if(dto.getCostCenterInitialId() != null) {
-            var costCenterInitial = costCenterService.findById(dto.getCostCenterInitialId());
+            var costCenterInitial = costCenterRepository.findById(dto.getCostCenterInitialId());
             if(costCenterInitial != null) {
                 inventoryAsset.setCostCenterInitial(costCenterInitial);
             }
@@ -98,7 +119,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         }
 
         if(dto.getCostCenterFinalId() != null) {
-            var costCenterFinal = costCenterService.findById(dto.getCostCenterFinalId());
+            var costCenterFinal = costCenterRepository.findById(dto.getCostCenterFinalId());
             if(costCenterFinal != null) {
                 inventoryAsset.setCostCenterFinal(costCenterFinal);
             }
@@ -110,10 +131,30 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         return result;
     }
 
+        @Operation(
+            summary = "Find an entity by ID",
+            description = "Finds and returns an entity by its unique identifier.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Entity found"),
+                    @ApiResponse(responseCode = "404", description = "Entity not found")
+            }
+    )
+    public InventoryAsset findById(@Parameter(description = "ID of the entity") InventoryAssetId id) {
+        return inventoryAssetRepository.findById(id);
+    }
+
+    @Operation(
+            summary = "Insert assets into a new inventory",
+            description = "Adds assets from the previous inventory or directly from the company's asset list to the new inventory.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully inserted assets into inventory"),
+                    @ApiResponse(responseCode = "404", description = "Previous inventory or company assets not found")
+            }
+    )
     @Override
     public Result<Integer> insertAssetsIntoNewInventory(Long newInventoryId, Long companyId) {
         Result<Integer> result = new Result<>();
-        Long lastInventoryId = inventoryService.getLastInventoryIdByCompanyId(companyId);
+        Long lastInventoryId = inventoryRepository.findLastIdByCompanyId(companyId);
 
         List<InventoryAsset> oldInventoryAssets
                 = inventoryAssetRepository.findAllByInventoryIdAndCompanyId(lastInventoryId, companyId);
@@ -123,7 +164,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
             return result.entityFound(oldInventoryAssets.size());
         }
         else {
-            List<Asset> assets = assetService.findAllByCompanyId(companyId);
+            List<Asset> assets = assetRepository.findAllByCompanyIdAndIsDeletedFalse(companyId);
             insertAssetsFromAsset(newInventoryId, assets);
             return result.entityFound(assets.size());
         }
@@ -133,7 +174,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         for(InventoryAsset asset : assets) {
             create(
                     InventoryAsset.builder()
-                        .inventory(inventoryService.findById(inventoryId))
+                        .inventory(inventoryRepository.findById(inventoryId))
                         .asset(asset.getAsset())
                         .costCenterInitial(asset.getCostCenterFinal())
                         .costCenterFinal(null)
@@ -148,7 +189,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         for (Asset asset : assets) {
             create(
                     InventoryAsset.builder()
-                        .inventory(inventoryService.findById(inventoryId))
+                        .inventory(inventoryRepository.findById(inventoryId))
                         .asset(asset)
                         .costCenterInitial(asset.getCostCenter())
                         .costCenterFinal(null)
@@ -159,6 +200,11 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         }
     }
 
+    @Operation(
+            summary = "Retrieve inventory detail",
+            description = "Fetches detailed information about an inventory, including its status and scanned assets.",
+            responses = @ApiResponse(responseCode = "200", description = "Successfully retrieved inventory details")
+    )
     @Override
     public Result<InventoryDetail> getInventoryDetail(Long inventoryId) {
         Result<InventoryDetail> result = new Result<>();
@@ -166,7 +212,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
     }
 
     private InventoryDetail getDetail(Long inventoryId) {
-        Inventory inventory = inventoryService.findById(inventoryId);
+        Inventory inventory = inventoryRepository.findById(inventoryId);
         if (dateBefore(inventory.getStartDate()))
             return InventoryDetail
                     .builder()
@@ -184,25 +230,33 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
                         .build();
     }
 
+    @Operation(
+            summary = "Set scanned assets for inventory",
+            description = "Marks assets as scanned in the given inventory and updates their details.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully scanned and updated assets"),
+                    @ApiResponse(responseCode = "404", description = "Inventory or assets not found")
+            }
+    )
     @Override
     public Result<Boolean> setAssetsScanned(Long inventoryId, List<ScanAssetDtoCreate> scannedAssets) {
-        Result<Boolean> result = new Result<Boolean>();
+        Result<Boolean> result = new Result<>();
         result.setSuccess(true);
 
-        if(inventoryService.findById(inventoryId) == null) {
+        if(inventoryRepository.findById(inventoryId) == null) {
             return result.entityNotFound("Inventory not found!");
         }
         List<InventoryAsset> inventoryAssets = new ArrayList<>();
 
         for (ScanAssetDtoCreate asset : scannedAssets) {
-            InventoryAsset inventoryAsset = inventoryAssetRepository.findByInventoryIdAnAssetId(inventoryId, asset.getAssetId());
+            InventoryAsset inventoryAsset = inventoryAssetRepository.findByInventoryIdAndAssetId(inventoryId, asset.getAssetId());
             if(inventoryAsset == null) {
                 result.entityNotFound(asset.getAssetId() + " assetId not found!");
                 continue;
             }
 
             inventoryAsset.setQuantityFinal(asset.getQuantity());
-            inventoryAsset.setCostCenterFinal(costCenterService.findById(asset.getCostCenterId()));
+            inventoryAsset.setCostCenterFinal(costCenterRepository.findById(asset.getCostCenterId()));
             inventoryAsset.setModifiedAt(new Date());
 
             inventoryAssets.add(inventoryAsset);

@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -22,5 +23,6 @@ public class Company extends CodeNameEntity {
     @JsonBackReference
     @OneToOne
     @JoinColumn(name = "manager_id")
+    @Schema(description = "The manager of the company.", example = "John Doe")
     private Employee manager;
 }

@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class CostCenter extends CodeNameEntity {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "division_id")
+    @Schema(description = "The division to which this cost center belongs.", example = "Finance Division")
     private Division division;
 
     @ManyToMany
@@ -31,5 +33,6 @@ public class CostCenter extends CodeNameEntity {
             joinColumns = @JoinColumn(name = "cost_center_id"),
             inverseJoinColumns = @JoinColumn(name = "employee_id")
     )
+    @Schema(description = "The employees assigned to this cost center.")
     private Set<Employee> employees = new HashSet<>();
 }
