@@ -1,20 +1,18 @@
 package org.example.project.service;
 
-import org.example.project.dto.department.DepartmentDtoCreate;
-import org.example.project.dto.department.DepartmentDtoUpdate;
 import org.example.project.dto.division.DivisionDtoCreate;
 import org.example.project.dto.division.DivisionDtoUpdate;
-import org.example.project.model.Department;
 import org.example.project.model.Division;
-import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.repository.IDivisionRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.IAssetService;
+import org.example.project.service.interfaces.IDivisionService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DivisionService extends BaseEntityService<Division, DivisionDtoCreate, DivisionDtoUpdate> {
+public class DivisionService extends BaseService<Division, DivisionDtoCreate, DivisionDtoUpdate> implements IDivisionService {
 
     private final IDivisionRepository divisionRepository;
     private final IDepartmentRepository departmentRepository;
@@ -28,7 +26,7 @@ public class DivisionService extends BaseEntityService<Division, DivisionDtoCrea
     @Override
     public Division mapToModel(DivisionDtoCreate dto) {
         return Division.builder()
-                .department((departmentRepository.findById(dto.getDepartmentId()).orElse(null)))
+                .department(departmentRepository.findById(dto.getDepartmentId()))
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
             .build();
@@ -54,12 +52,12 @@ public class DivisionService extends BaseEntityService<Division, DivisionDtoCrea
             division.setName(dto.getName().trim());
         }
         if(dto.getDepartmentId() != null) {
-            var department = departmentRepository.findById(dto.getDepartmentId()).orElse(null);
+            var department = departmentRepository.findById(dto.getDepartmentId());
             if(department != null) {
                 division.setDepartment(department);
             }
             else {
-                result.entityNotFound("Department");
+                result.entityNotFound("Department not found!");
             }
         }
 

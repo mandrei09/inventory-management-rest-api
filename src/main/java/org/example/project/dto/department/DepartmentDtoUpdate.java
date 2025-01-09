@@ -16,5 +16,5 @@ public class DepartmentDtoUpdate implements IBaseDtoUpdate {
 
     private String name;
 
-    private Integer companyId;
+    private Long companyId;
 }

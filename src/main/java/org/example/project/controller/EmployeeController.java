@@ -1,6 +1,6 @@
 package org.example.project.controller;
 
-import org.example.project.controller.generic.BaseEntityController;
+import org.example.project.controller.generic.BaseController;
 import org.example.project.dto.employee.EmployeeDtoCreate;
 import org.example.project.dto.employee.EmployeeDtoUpdate;
 import org.example.project.model.Employee;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/employees")
 @Validated
-public class EmployeeController extends BaseEntityController<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> {
+public class EmployeeController extends BaseController<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> {
 
     private final EmployeeService employeeService;
 

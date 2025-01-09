@@ -7,17 +7,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.example.project.model.embedable.InventoryAssetId;
+import org.example.project.model.generic.BaseEntity;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class InventoryAsset {
+public class InventoryAsset extends BaseEntity {
     @EmbeddedId
-    private InventoryAssetId id = new InventoryAssetId();
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(insertable = false, updatable = false))
+    })
 
-    private Double value;
+    private InventoryAssetId id = new InventoryAssetId();
 
     @ManyToOne
     @MapsId("inventoryId")

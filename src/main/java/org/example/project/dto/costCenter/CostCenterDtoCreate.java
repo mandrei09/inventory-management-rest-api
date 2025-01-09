@@ -19,5 +19,5 @@ public class CostCenterDtoCreate implements IBaseDtoCreate {
     private String name;
 
     @NotNull(message = "DivisionId cannot be null.")
-    private Integer divisionId;
+    private Long divisionId;
 }

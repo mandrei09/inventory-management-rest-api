@@ -4,7 +4,7 @@ import org.example.project.dto.PaymentDto;
 import org.example.project.exceptions.PaymentException;
 import org.example.project.model.Payment;
 import org.example.project.repository.PaymentRepository;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +52,14 @@ public class PaymentService {
     public Payment cancelPayment(Integer paymentId) {
         var payment =  paymentRepository.findById(paymentId)
                 .map(innerPayment -> {
-                    if(innerPayment.getPaymentStatus() == PaymentStatus.CANCELLED) {
+                    if(innerPayment.getPaymentStatus() == InventoryStatus.CANCELLED) {
                         throw new PaymentException("Payment is already cancelled");
                     }
                     return innerPayment;
                 })
                 .orElseThrow(() -> new PaymentException("The payment does not exist"));
 
-        payment.setPaymentStatus(PaymentStatus.CANCELLED);
+        payment.setPaymentStatus(InventoryStatus.CANCELLED);
         LOGGER.debug("Payment {} was successfully cancelled.", payment);
         return paymentRepository.save(payment);
     }
@@ -68,7 +68,7 @@ public class PaymentService {
         List<Payment> payments;
         if (filters != null && !filters.isEmpty()) {
            payments = paymentRepository
-                    .findAllByPaymentStatusOrPaymentType(PaymentStatus.getValueByString(filters.get("paymentStatus")),
+                    .findAllByPaymentStatusOrPaymentType(InventoryStatus.getValueByString(filters.get("paymentStatus")),
                             PaymentType.getValueByString(filters.get("paymentType")));
            LOGGER.debug("Returning {} payments filtered by {}", payments, filters);
         } else {

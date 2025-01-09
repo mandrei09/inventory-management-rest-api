@@ -26,7 +26,7 @@ public class AssetDtoCreate implements IBaseDtoCreate {
     private Double value;
 
     @NotNull(message = "CostCenterId cannot be null.")
-    private Integer costCenterId;
+    private Long costCenterId;
 
     private Date acquisitionDate;
 }

@@ -1,6 +1,7 @@
 package org.example.project.dto.employee;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,13 +24,14 @@ public class EmployeeDtoCreate implements IBaseDtoCreate {
     @NotNull(message = "Lastname type cannot be null.")
     private String lastName;
 
+    @Pattern(regexp = "^[\\w-\\.]+@[\\w-]+\\.[a-z]{2,4}$", message = "Invalid email format.")
     @NotNull(message = "Email type cannot be null.")
     private String email;
 
-    private Integer managerId;
+    private Long managerId;
 
     @NotNull(message = "CompanyId cannot be null.")
-    private Integer companyId;
+    private Long companyId;
 
     private Date birthDate;
 }

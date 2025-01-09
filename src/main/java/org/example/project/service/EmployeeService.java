@@ -6,13 +6,15 @@ import org.example.project.model.Employee;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.IAssetService;
+import org.example.project.service.interfaces.IEmployeeService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class EmployeeService extends BaseEntityService<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> {
+public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, EmployeeDtoUpdate> implements IEmployeeService {
 
     private final IEmployeeRepository employeeRepository;
     private final ICompanyRepository companyRepository;
@@ -34,7 +36,7 @@ public class EmployeeService extends BaseEntityService<Employee, EmployeeDtoCrea
             .name(trimStringOrNull(dto.getName()))
             .lastName(trimStringOrNull(dto.getLastName()))
             .email(trimStringOrNull(dto.getEmail()))
-            .manager(employeeRepository.findById(dto.getManagerId()).orElse(null))
+            .manager(employeeRepository.findById(dto.getManagerId()))
             .birthDate(dto.getBirthDate())
             .build();
     }
@@ -69,22 +71,22 @@ public class EmployeeService extends BaseEntityService<Employee, EmployeeDtoCrea
             employee.setEmail(dto.getEmail().trim());
 
         if(dto.getManagerId() != null) {
-            var manager = employeeRepository.findById(dto.getManagerId()).orElse(null);
+            var manager = employeeRepository.findById(dto.getManagerId());
             if(manager != null) {
                 employee.setManager(manager);
             }
             else {
-                result.entityNotFound("Manager");
+                result.entityNotFound("Manager not found!");
             }
         }
 
         if(dto.getCompanyId() != null) {
-            var company = companyRepository.findById(dto.getCompanyId()).orElse(null);
+            var company = companyRepository.findById(dto.getCompanyId());
             if(company != null) {
                 employee.setCompany(company);
             }
             else {
-                result.entityNotFound("Company");
+                result.entityNotFound("Company not found!");
             }
         }
 

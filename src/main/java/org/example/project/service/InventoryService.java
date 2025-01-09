@@ -1,21 +1,18 @@
 package org.example.project.service;
 
-import org.example.project.dto.costCenter.CostCenterDtoCreate;
-import org.example.project.dto.costCenter.CostCenterDtoUpdate;
 import org.example.project.dto.inventory.InventoryDtoCreate;
 import org.example.project.dto.inventory.InventoryDtoUpdate;
-import org.example.project.model.CostCenter;
 import org.example.project.model.Inventory;
 import org.example.project.repository.ICompanyRepository;
-import org.example.project.repository.ICostCenterRepository;
-import org.example.project.repository.IDivisionRepository;
 import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.IAssetService;
+import org.example.project.service.interfaces.IInventoryService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InventoryService extends BaseEntityService<Inventory, InventoryDtoCreate, InventoryDtoUpdate> {
+public class InventoryService extends BaseService<Inventory, InventoryDtoCreate, InventoryDtoUpdate> implements IInventoryService {
 
     private final IInventoryRepository inventoryRepository;
     private final ICompanyRepository companyRepository;
@@ -29,7 +26,7 @@ public class InventoryService extends BaseEntityService<Inventory, InventoryDtoC
     @Override
     public Inventory mapToModel(InventoryDtoCreate dto) {
         return Inventory.builder()
-                .company((companyRepository.findById(dto.getCompanyId()).orElse(null)))
+                .company(companyRepository.findById(dto.getCompanyId()))
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
                 .info(trimStringOrNull(dto.getInfo()))
@@ -79,10 +76,20 @@ public class InventoryService extends BaseEntityService<Inventory, InventoryDtoC
                 inventory.setCompany(company);
             }
             else {
-                result.entityNotFound("Company");
+                result.entityNotFound("Company not found!");
             }
         }
 
         return result;
+    }
+
+    @Override
+    public Long getLastInventoryIdByCompanyId(Long companyId) {
+        return inventoryRepository.findByCompanyId(companyId);
+    }
+
+    @Override
+    public Inventory findById(Long id) {
+        return inventoryRepository.findById(id);
     }
 }

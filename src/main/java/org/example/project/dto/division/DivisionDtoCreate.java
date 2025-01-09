@@ -19,5 +19,5 @@ public class DivisionDtoCreate implements IBaseDtoCreate {
     private String name;
 
     @NotNull(message = "DepartmentId cannot be null.")
-    private Integer departmentId;
+    private Long departmentId;
 }

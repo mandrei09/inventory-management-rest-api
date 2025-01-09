@@ -15,5 +15,5 @@ public class DivisionDtoUpdate implements IBaseDtoUpdate {
 
     private String name;
 
-    private Integer departmentId;
+    private Long departmentId;
 }

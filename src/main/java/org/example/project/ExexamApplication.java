@@ -3,7 +3,7 @@ package org.example.project;
 import org.example.project.model.Payment;
 import org.example.project.repository.PaymentRepository;
 import org.example.project.service.PaymentService;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -33,7 +33,7 @@ public class ExexamApplication implements CommandLineRunner {
                 .amount(20000)
                 .customer("Customer 1")
                 .paymentType(PaymentType.ONLINE)
-                .paymentStatus(PaymentStatus.NEW)
+                .paymentStatus(InventoryStatus.NEW)
                 .build();
 
         Payment payment1 = Payment
@@ -41,7 +41,7 @@ public class ExexamApplication implements CommandLineRunner {
                 .amount(20000)
                 .customer("Customer 1")
                 .paymentType(PaymentType.ONLINE)
-                .paymentStatus(PaymentStatus.NEW)
+                .paymentStatus(InventoryStatus.NEW)
                 .build();
 
         Payment payment2 = Payment
@@ -49,7 +49,7 @@ public class ExexamApplication implements CommandLineRunner {
                 .amount(20000)
                 .customer("Customer 1")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.CANCELLED)
+                .paymentStatus(InventoryStatus.CANCELLED)
                 .build();
 
         Payment payment3 = Payment
@@ -57,7 +57,7 @@ public class ExexamApplication implements CommandLineRunner {
                 .amount(20000)
                 .customer("Customer 1")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.PROCESSED)
+                .paymentStatus(InventoryStatus.PROCESSED)
                 .build();
 
 //        paymentRepository.save(payment2);

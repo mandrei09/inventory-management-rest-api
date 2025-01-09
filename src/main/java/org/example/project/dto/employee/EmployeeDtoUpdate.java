@@ -21,9 +21,9 @@ public class EmployeeDtoUpdate implements IBaseDtoUpdate {
 
     private String email;
 
-    private Integer managerId;
+    private Long managerId;
 
-    private Integer companyId;
+    private Long companyId;
 
     private Date birthDate;
 }

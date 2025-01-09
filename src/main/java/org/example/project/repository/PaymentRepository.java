@@ -2,7 +2,7 @@ package org.example.project.repository;
 
 import jakarta.transaction.Transactional;
 import org.example.project.model.Payment;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,8 +17,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer>, JpaS
     @Modifying
     @Query("update Payment ps set ps.paymentStatus = :paymentStatus where ps.customer = :customer")
     @Transactional
-    void cancelPayment(@Param("paymentStatus") PaymentStatus paymentStatus, @Param("customer") String customer);
+    void cancelPayment(@Param("paymentStatus") InventoryStatus paymentStatus, @Param("customer") String customer);
 
-    List<Payment> findAllByPaymentStatusOrPaymentType(PaymentStatus paymentStatus, PaymentType paymentType);
+    List<Payment> findAllByPaymentStatusOrPaymentType(InventoryStatus paymentStatus, PaymentType paymentType);
 
 }

@@ -1,23 +1,68 @@
 package org.example.project.controller;
 
-import org.example.project.controller.generic.BaseEntityController;
-import org.example.project.dto.costCenter.CostCenterDtoCreate;
-import org.example.project.dto.costCenter.CostCenterDtoUpdate;
+import jakarta.validation.Valid;
+import org.example.project.controller.generic.BaseController;
 import org.example.project.dto.inventory.InventoryDtoCreate;
 import org.example.project.dto.inventory.InventoryDtoUpdate;
-import org.example.project.model.CostCenter;
+import org.example.project.dto.others.InventoryDetail;
+import org.example.project.dto.others.ScanAssetDtoCreate;
 import org.example.project.model.Inventory;
-import org.example.project.service.CostCenterService;
+import org.example.project.result.Result;
+import org.example.project.service.InventoryAssetService;
 import org.example.project.service.InventoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/inventories")
 @Validated
-public class InventoryController extends BaseEntityController<Inventory, InventoryDtoCreate, InventoryDtoUpdate> {
-    public InventoryController(InventoryService inventoryService) {
+public class InventoryController extends BaseController<Inventory, InventoryDtoCreate, InventoryDtoUpdate> {
+    private final InventoryService inventoryService;
+    private final InventoryAssetService inventoryAssetService;
+
+    public InventoryController(InventoryService inventoryService, InventoryAssetService inventoryAssetService) {
         super(inventoryService);
+        this.inventoryService = inventoryService;
+        this.inventoryAssetService = inventoryAssetService;
+    }
+
+    @Override
+    @PostMapping("/create")
+    public ResponseEntity<?> create(@RequestBody @Valid InventoryDtoCreate inventoryDto) {
+        Inventory createdInventory = inventoryService.create(inventoryDto);
+
+        if (createdInventory != null) {
+            Result<Integer> assetsInserted =
+                    inventoryAssetService.insertAssetsIntoNewInventory(createdInventory.getId(), inventoryDto.getCompanyId());
+
+            if(assetsInserted.isSuccess()) {
+                var uri = ServletUriComponentsBuilder
+                        .fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(createdInventory.getId())
+                        .toUri();
+
+                return ResponseEntity.created(uri).body(createdInventory);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(assetsInserted.getMessage());
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/detail/{inventoryId}")
+    public ResponseEntity<Result<InventoryDetail>> inventoryDetail(@PathVariable Long inventoryId) {
+        return ResponseEntity.ok().body(inventoryAssetService.getInventoryDetail(inventoryId));
+    }
+
+    @PutMapping("/setassetsscanned/{inventoryId}")
+    public ResponseEntity<?> setAssetsScanned(@PathVariable Long inventoryId, @RequestBody @Valid List<ScanAssetDtoCreate> inventoryDto) {
+        return ResponseEntity.ok().body(inventoryAssetService.setAssetsScanned(inventoryId, inventoryDto));
     }
 }

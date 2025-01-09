@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 
 @AllArgsConstructor
@@ -21,5 +21,5 @@ public class PaymentDto {
     @Min(value = 1, message = "The amount should be greater than 1")
     private double amount;
     @NotNull(message = "Payment status cannot be null.")
-    private PaymentStatus paymentStatus;
+    private InventoryStatus paymentStatus;
 }

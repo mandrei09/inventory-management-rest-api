@@ -23,7 +23,7 @@ public class InventoryDtoCreate implements IBaseDtoCreate {
     private String info;
 
     @NotNull(message = "CompanyId cannot be null.")
-    private Integer companyId;
+    private Long companyId;
 
     @NotNull(message = "StartDate cannot be null.")
     private Date startDate;

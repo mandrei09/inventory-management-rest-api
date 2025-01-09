@@ -6,13 +6,14 @@ import org.example.project.model.Company;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.ICompanyService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class CompanyService extends BaseEntityService<Company, CompanyDtoCreate, CompanyDtoUpdate> {
+public class CompanyService extends BaseService<Company, CompanyDtoCreate, CompanyDtoUpdate> implements ICompanyService {
 
     private final ICompanyRepository companyRepository;
     private final IEmployeeRepository employeeRepository;
@@ -30,7 +31,7 @@ public class CompanyService extends BaseEntityService<Company, CompanyDtoCreate,
     @Override
     public Company mapToModel(CompanyDtoCreate dto) {
         return Company.builder()
-                .manager((employeeRepository.findById(dto.getManagerId()).orElse(null)))
+                .manager(employeeRepository.findById(dto.getManagerId()))
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
             .build();
@@ -56,12 +57,12 @@ public class CompanyService extends BaseEntityService<Company, CompanyDtoCreate,
             company.setName(dto.getName().trim());
         }
         if(dto.getManagerId() != null) {
-            var manager = employeeRepository.findById(dto.getManagerId()).orElse(null);
+            var manager = employeeRepository.findById(dto.getManagerId());
             if(manager != null) {
                 company.setManager(manager);
             }
             else {
-                result.entityNotFound("Manager");
+                result.entityNotFound("Manager not found!");
             }
         }
 

@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 
 @Entity
@@ -31,5 +31,5 @@ public class Payment {
     private double amount;
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
-    private PaymentStatus paymentStatus;
+    private InventoryStatus paymentStatus;
 }

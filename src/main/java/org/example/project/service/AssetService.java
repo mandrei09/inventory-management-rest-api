@@ -2,20 +2,18 @@ package org.example.project.service;
 
 import org.example.project.dto.asset.AssetDtoCreate;
 import org.example.project.dto.asset.AssetDtoUpdate;
-import org.example.project.dto.inventory.InventoryDtoCreate;
-import org.example.project.dto.inventory.InventoryDtoUpdate;
 import org.example.project.model.Asset;
-import org.example.project.model.Inventory;
 import org.example.project.repository.IAssetRepository;
-import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.ICostCenterRepository;
-import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.IAssetService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class AssetService extends BaseEntityService<Asset, AssetDtoCreate, AssetDtoUpdate> {
+public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpdate> implements IAssetService {
 
     private final IAssetRepository assetRepository;
     private final ICostCenterRepository costCenterRepository;
@@ -29,7 +27,7 @@ public class AssetService extends BaseEntityService<Asset, AssetDtoCreate, Asset
     @Override
     public Asset mapToModel(AssetDtoCreate dto) {
         return Asset.builder()
-                .costCenter((costCenterRepository.findById(dto.getCostCenterId()).orElse(null)))
+                .costCenter(costCenterRepository.findById(dto.getCostCenterId()))
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
                 .value(dto.getValue())
@@ -69,15 +67,20 @@ public class AssetService extends BaseEntityService<Asset, AssetDtoCreate, Asset
         }
 
         if(dto.getCostCenterId() != null) {
-            var costCenter = costCenterRepository.findById(dto.getCostCenterId()).orElse(null);
+            var costCenter = costCenterRepository.findById(dto.getCostCenterId());
             if(costCenter != null) {
                 asset.setCostCenter(costCenter);
             }
             else {
-                result.entityNotFound("Cost center");
+                result.entityNotFound("Cost center not found!");
             }
         }
 
         return result;
+    }
+
+    @Override
+    public List<Asset> findAllByCompanyId(Long companyId) {
+        return assetRepository.findAllByCompanyIdAndIsDeletedFalse(companyId);
     }
 }

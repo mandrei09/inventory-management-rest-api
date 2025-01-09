@@ -19,5 +19,5 @@ public class CompanyDtoCreate implements IBaseDtoCreate {
     private String name;
 
     @NotNull(message = "ManagerId cannot be null.")
-    private Integer managerId;
+    private Long managerId;
 }

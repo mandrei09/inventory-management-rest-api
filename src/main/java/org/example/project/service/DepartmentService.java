@@ -6,11 +6,13 @@ import org.example.project.model.Department;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.result.Result;
-import org.example.project.service.generic.BaseEntityService;
+import org.example.project.service.generic.BaseService;
+import org.example.project.service.interfaces.IAssetService;
+import org.example.project.service.interfaces.IDepartmentService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DepartmentService extends BaseEntityService<Department, DepartmentDtoCreate, DepartmentDtoUpdate> {
+public class DepartmentService extends BaseService<Department, DepartmentDtoCreate, DepartmentDtoUpdate> implements IDepartmentService {
 
     private final IDepartmentRepository departmentRepository;
     private final ICompanyRepository companyRepository;
@@ -24,7 +26,7 @@ public class DepartmentService extends BaseEntityService<Department, DepartmentD
     @Override
     public Department mapToModel(DepartmentDtoCreate dto) {
         return Department.builder()
-                .company((companyRepository.findById(dto.getCompanyId()).orElse(null)))
+                .company(companyRepository.findById(dto.getCompanyId()))
                 .code(dto.getCode().trim())
                 .name(dto.getName().trim())
             .build();
@@ -50,12 +52,12 @@ public class DepartmentService extends BaseEntityService<Department, DepartmentD
             department.setName(dto.getName().trim());
         }
         if(dto.getCompanyId() != null) {
-            var company = companyRepository.findById(dto.getCompanyId()).orElse(null);
+            var company = companyRepository.findById(dto.getCompanyId());
             if(company != null) {
                 department.setCompany(company);
             }
             else {
-                result.entityNotFound("Company");
+                result.entityNotFound("Company not found!");
             }
         }
 

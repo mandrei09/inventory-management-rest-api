@@ -17,7 +17,7 @@ import java.util.Date;
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected int id;
+    protected Long id;
 
     protected Date createdAt = new Date();
     protected Date modifiedAt = new Date();

@@ -1,6 +1,6 @@
 package org.example.project.controller;
 
-import org.example.project.controller.generic.BaseEntityController;
+import org.example.project.controller.generic.BaseController;
 import org.example.project.dto.company.CompanyDtoCreate;
 import org.example.project.dto.company.CompanyDtoUpdate;
 import org.example.project.model.Company;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/companies")
 @Validated
-public class CompanyController extends BaseEntityController<Company, CompanyDtoCreate, CompanyDtoUpdate> {
+public class CompanyController extends BaseController<Company, CompanyDtoCreate, CompanyDtoUpdate> {
 
     public CompanyController(CompanyService companyService) {
         super(companyService);

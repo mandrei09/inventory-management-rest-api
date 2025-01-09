@@ -1,26 +1,29 @@
 package org.example.project.result;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
+@Builder
 public class Result<T> {
-    protected boolean success = true;
-    protected String message = null;
+
+    private final String DEFAULT_ERROR_MESSAGE = "Unknown Error!";
+
+    protected boolean success = false;
+    protected String message = DEFAULT_ERROR_MESSAGE;
     protected T object = null;
 
-    public Result<T> entityNotFound(String entityName) {
-        if (entityName != null) {
-            if (this.message != null && !this.message.isEmpty()) {
+    public Result<T> entityNotFound(String errorMessage) {
+        if (errorMessage != null) {
+            if (this.message != null && !this.message.equals(DEFAULT_ERROR_MESSAGE)) {
                 this.message += "\n";
             }
 
-            this.message = (this.message == null ? "" : this.message) + String.format("%s not found!", entityName);
+            this.message = (this.message.equals(DEFAULT_ERROR_MESSAGE) ? "" : this.message);
         }
 
         this.success = false;

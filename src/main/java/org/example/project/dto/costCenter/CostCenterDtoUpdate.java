@@ -16,5 +16,5 @@ public class CostCenterDtoUpdate implements IBaseDtoUpdate {
 
     private String name;
 
-    private Integer divisionId;
+    private Long divisionId;
 }

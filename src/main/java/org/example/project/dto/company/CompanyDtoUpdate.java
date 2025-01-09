@@ -15,5 +15,5 @@ public class CompanyDtoUpdate implements IBaseDtoUpdate {
 
     private String name;
 
-    private Integer managerId;
+    private Long managerId;
 }

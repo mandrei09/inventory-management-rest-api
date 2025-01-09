@@ -2,7 +2,7 @@ package org.example.project.service;
 
 import org.example.project.dto.PaymentDto;
 import org.example.project.repository.PaymentRepository;
-import org.example.project.utils.PaymentStatus;
+import org.example.project.utils.InventoryStatus;
 import org.example.project.utils.PaymentType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ public class PaymentServiceTest {
                 .amount(2000)
                 .customer("Customer8")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.PROCESSED)
+                .paymentStatus(InventoryStatus.PROCESSED)
                 .build();
 
         var payment = fromDtoToPayment(paymentDto);
@@ -76,7 +76,7 @@ public class PaymentServiceTest {
                 .amount(2000)
                 .customer("Customer8")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.PROCESSED)
+                .paymentStatus(InventoryStatus.PROCESSED)
                 .build();
 
         var payment = fromDtoToPayment(paymentDto);
@@ -87,7 +87,7 @@ public class PaymentServiceTest {
 
         var result = paymentService.cancelPayment(paymentId);
 
-        assertEquals(PaymentStatus.CANCELLED, result.getPaymentStatus());
+        assertEquals(InventoryStatus.CANCELLED, result.getPaymentStatus());
         verify(paymentRepository).save(payment);
     }
 
@@ -100,7 +100,7 @@ public class PaymentServiceTest {
                 .amount(2000)
                 .customer("Customer8")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.PROCESSED)
+                .paymentStatus(InventoryStatus.PROCESSED)
                 .build();
 
         var payment = fromDtoToPayment(paymentDto);
@@ -125,7 +125,7 @@ public class PaymentServiceTest {
                 .amount(2000)
                 .customer("Customer8")
                 .paymentType(PaymentType.POS)
-                .paymentStatus(PaymentStatus.CANCELLED)
+                .paymentStatus(InventoryStatus.CANCELLED)
                 .build();
 
         var payment = fromDtoToPayment(paymentDto);

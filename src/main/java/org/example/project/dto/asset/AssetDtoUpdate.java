@@ -21,7 +21,7 @@ public class AssetDtoUpdate implements IBaseDtoUpdate {
     @Min(value = 0, message = "The value should be greater than 0!")
     private Double value;
 
-    private Integer costCenterId;
+    private Long costCenterId;
 
     private Date acquisitionDate;
 }
