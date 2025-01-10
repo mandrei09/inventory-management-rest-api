@@ -40,18 +40,26 @@ public abstract class BaseController
 
         Result<List<Model>> result = service.findEntitiesByFilters(filters);
         if(result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(result.getObject());
+            return ResponseEntity.ok()
+                    .body(result.getObject());
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Get entity by ID", description = "Retrieve a specific entity by its ID.")
     @GetMapping("/{entityId}")
-    public ResponseEntity<Model> findById(
+    public ResponseEntity<?> findById(
             @PathVariable @Parameter(description = "The ID of the entity to retrieve") Long entityId) {
-        return ResponseEntity.ok().body(service.findById(entityId));
+        Result<Model> result = service.findById(entityId);
+
+        if(result != null && result.isSuccess()) {
+            return ResponseEntity.ok()
+                    .body(result.getObject());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Create a new entity", description = "Create a new entity based on the provided DTO.")
@@ -69,7 +77,25 @@ public abstract class BaseController
             return ResponseEntity.created(uri).body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
+    }
+
+    @Operation(summary = "Create new entities.", description = "Create new entities based on the provided list of DTOs.")
+    @PostMapping("/create-many")
+    public ResponseEntity<?> create(@RequestBody @Valid @Parameter(description = "DTO list containing the data to create the new entities") List<DtoCreate> dtoList) {
+        Result<List<Model>> result = service.createMany(dtoList);
+
+        if (result != null && result.isSuccess()) {
+            var uri = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(result.getObject().get(0).getId())
+                    .toUri();
+
+            return ResponseEntity.created(uri).body(result.getObject());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Update an existing entity", description = "Update an existing entity with the provided DTO by entity ID.")
@@ -80,10 +106,11 @@ public abstract class BaseController
         Result<Model> result = service.update(entityId, dto);
 
         if (result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(result.getObject());
+            return ResponseEntity.ok()
+                    .body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Soft delete an entity", description = "Soft delete an entity by ID, marking it as deleted without actually removing it from the database.")
@@ -92,22 +119,24 @@ public abstract class BaseController
         Result<Model> result = service.softDelete(entityId);
 
         if (result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(result.getObject());
+            return ResponseEntity.ok()
+                    .body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Delete an entity", description = "Delete an entity permanently by its ID.")
     @DeleteMapping("/delete/{entityId}")
-    public ResponseEntity<String> delete(@PathVariable @Parameter(description = "The ID of the entity to delete") Long entityId) {
+    public ResponseEntity<?> delete(@PathVariable @Parameter(description = "The ID of the entity to delete") Long entityId) {
         Result<Model> result = service.delete(entityId);
 
         if (result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(StatusMessages.entityDeleted(result.getObject().getClass().getSimpleName()));
+            return ResponseEntity.ok()
+                    .body(StatusMessages.entityDeleted(result.getObject().getClass().getSimpleName()));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Clean up entities", description = "Hard delete entities based on a date filter.")
@@ -116,9 +145,10 @@ public abstract class BaseController
         Result<Integer> result = service.cleanUp(dateBefore);
 
         if (result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(result.getObject() + " entities deleted!");
+            return ResponseEntity.ok()
+                    .body(StatusMessages.entitiesDeleted(result.getObject(), "entities"));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 }

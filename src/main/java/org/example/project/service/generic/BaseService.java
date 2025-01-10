@@ -12,7 +12,6 @@ import org.example.project.result.Result;
 import org.example.project.utils.StatusMessages;
 import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
-import org.hibernate.query.sqm.PathElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
@@ -55,7 +54,7 @@ public abstract class BaseService
             }
         }
 
-        return result.entityFound(repository.findAllByIsDeletedFalse().toList());
+        return result.entityFound(repository.findAllByIsDeletedFalse());
     }
 
     @Operation(
@@ -66,8 +65,14 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "404", description = "Entity not found")
             }
     )
-    public Model findById(@Parameter(description = "ID of the entity") Long id) {
-        return repository.findById(id);
+    public Result<Model> findById(@Parameter(description = "ID of the entity") Long id) {
+        Result<Model> result = new Result<>();
+
+        Model entityFound = repository.findById(id);
+        if(entityFound == null) {
+            return result.entityNotFound(id, StatusMessages.ENTITY_NOT_FOUND);
+        }
+        return result.entityFound(entityFound);
     }
 
     @Override
@@ -92,6 +97,47 @@ public abstract class BaseService
             result.setObject(databaseEntity);
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    @Operation(
+            summary = "Create new entities",
+            description = "Creates new entities from the provided DTO list and stores those in the database.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Entities created successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data")
+            }
+    )
+    public Result<List<Model>> createMany(List<DtoCreate> dtoList) {
+        Result<List<Model>> listResult = new Result<>();
+        Result<Model> result = null;
+
+        List<Model> entities = new ArrayList<>();
+        Model databaseEntity = null;
+
+        listResult.setSuccess(true);
+
+        for (DtoCreate dto : dtoList) {
+            result = mapToModel(dto);
+            if(result.isSuccess()) {
+                databaseEntity = result.getObject();
+                databaseEntity.setCreatedAt(new Date());
+                databaseEntity.setModifiedAt(new Date());
+                databaseEntity.setDeleted(false);
+
+                entities.add(databaseEntity);
+            }
+            else {
+                listResult.entityNotFound(result.getMessages());
+            }
+        }
+        if(listResult.isSuccess()) {
+            repository.saveAll(entities);
+            listResult.entityFound(entities);
+        }
+
+        return listResult;
     }
 
     @Override
@@ -177,6 +223,7 @@ public abstract class BaseService
     }
 
     @Override
+    @Transactional
     @Operation(
             summary = "Clean up soft-deleted entities",
             description = "Deletes entities that are marked as deleted and were created before the specified date.",

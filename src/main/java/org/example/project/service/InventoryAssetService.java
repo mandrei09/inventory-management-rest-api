@@ -56,24 +56,24 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
 
         Inventory inventory = inventoryRepository.findById(dto.getInventoryId());
         if(inventory == null) {
-            result.entityNotFound(StatusMessages.INVENTORY_NOT_FOUND);
+            result.entityNotFound(dto.getInventoryId(), StatusMessages.INVENTORY_NOT_FOUND);
         }
 
         Asset asset = assetRepository.findById(dto.getAssetId());
         if(asset == null) {
-            result.entityNotFound(StatusMessages.ASSET_NOT_FOUND);
+            result.entityNotFound(dto.getAssetId(), StatusMessages.ASSET_NOT_FOUND);
         }
 
         CostCenter costCenterInitial = costCenterRepository.findById(dto.getCostCenterInitialId());
 
         if (costCenterInitial == null) {
-            return result.entityNotFound(StatusMessages.COST_CENTER_INITIAL_NOT_FOUND);
+            return result.entityNotFound(dto.getCostCenterInitialId(), StatusMessages.COST_CENTER_INITIAL_NOT_FOUND);
         }
 
         CostCenter costCenterFinal = costCenterRepository.findById(dto.getCostCenterFinalId());
 
         if (costCenterFinal == null) {
-            return result.entityNotFound(StatusMessages.COST_CENTER_FINAL_NOT_FOUND);
+            return result.entityNotFound(dto.getCostCenterFinalId(), StatusMessages.COST_CENTER_FINAL_NOT_FOUND);
         }
 
         if(!result.isSuccess())
@@ -126,7 +126,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
                 inventoryAsset.setInventory(inventory);
             }
             else {
-                result.entityNotFound("Inventory not found!");
+                result.entityNotFound(dto.getInventoryId(), StatusMessages.INVENTORY_NOT_FOUND);
             }
         }
 
@@ -136,7 +136,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
                 inventoryAsset.setAsset(asset);
             }
             else {
-                result.entityNotFound("Asset not found!");
+                result.entityNotFound(dto.getAssetId(), StatusMessages.ASSET_NOT_FOUND);
             }
         }
 
@@ -146,7 +146,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
                 inventoryAsset.setCostCenterInitial(costCenterInitial);
             }
             else {
-                result.entityNotFound("CostCenterInitial not found!");
+                result.entityNotFound(dto.getCostCenterInitialId(), StatusMessages.COST_CENTER_INITIAL_NOT_FOUND);
             }
         }
 
@@ -156,7 +156,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
                 inventoryAsset.setCostCenterFinal(costCenterFinal);
             }
             else {
-                result.entityNotFound("CostCenterFinal not found!");
+                result.entityNotFound(dto.getCostCenterFinalId(), StatusMessages.COST_CENTER_FINAL_NOT_FOUND);
             }
         }
 
@@ -221,6 +221,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         for (Asset asset : assets) {
             create(
                     InventoryAsset.builder()
+                        .inventoryAssetId(new InventoryAssetId(inventoryId, asset.getId()))
                         .inventory(inventoryRepository.findById(inventoryId))
                         .asset(asset)
                         .costCenterInitial(asset.getCostCenter())
@@ -240,11 +241,14 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
     @Override
     public Result<InventoryDetail> getInventoryDetail(Long inventoryId) {
         Result<InventoryDetail> result = new Result<>();
-        return result.entityFound(getDetail(inventoryId));
+        Inventory inventory = inventoryRepository.findById(inventoryId);
+        if(inventory == null) {
+            return result.entityNotFound(inventoryId, StatusMessages.INVENTORY_NOT_FOUND);
+        }
+        return result.entityFound(getDetail(inventory));
     }
 
-    private InventoryDetail getDetail(Long inventoryId) {
-        Inventory inventory = inventoryRepository.findById(inventoryId);
+    private InventoryDetail getDetail(Inventory inventory) {
         if (dateBefore(inventory.getStartDate()))
             return InventoryDetail
                     .builder()
@@ -254,11 +258,11 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         return
                 InventoryDetail
                     .builder()
-                        .status(dateAfter(new Date(), inventory.getEndDate()) ? InventoryStatus.FINISHED : InventoryStatus.NOT_FINISHED)
-                        .assetsScanned(inventoryAssetRepository.countAllAssetsScannedByInventoryId(inventoryId))
-                        .finishedCostCenters(inventoryAssetRepository.countAllAssetsScannedByInventoryId(inventoryId))
-                        .valueLost(inventoryAssetRepository.calculateTotalDifferenceValue(inventoryId))
-                        .differences(inventoryAssetRepository.findByInventoryIdWithDifferences(inventoryId))
+                        .status(dateAfter(new Date(), inventory.getEndDate()) ? InventoryStatus.NOT_FINISHED : InventoryStatus.FINISHED)
+                        .assetsScanned(inventoryAssetRepository.countAllAssetsScannedByInventoryId(inventory.getId()))
+                        .finishedCostCenters(inventoryAssetRepository.countFullScannedCostCenters(inventory.getId()))
+                        .valueLost(inventoryAssetRepository.calculateTotalDifferenceValue(inventory.getId()))
+                        .differences(inventoryAssetRepository.findByInventoryIdWithDifferences(inventory.getId()))
                         .build();
     }
 
@@ -276,14 +280,14 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
         result.setSuccess(true);
 
         if(inventoryRepository.findById(inventoryId) == null) {
-            return result.entityNotFound("Inventory not found!");
+            return result.entityNotFound(inventoryId, StatusMessages.INVENTORY_NOT_FOUND);
         }
         List<InventoryAsset> inventoryAssets = new ArrayList<>();
 
         for (ScanAssetDtoCreate asset : scannedAssets) {
             InventoryAsset inventoryAsset = inventoryAssetRepository.findByInventoryIdAndAssetId(inventoryId, asset.getAssetId());
             if(inventoryAsset == null) {
-                result.entityNotFound(asset.getAssetId() + " assetId not found!");
+                result.entityNotFound(asset.getAssetId(), StatusMessages.ASSET_NOT_FOUND);
                 continue;
             }
 
@@ -296,7 +300,7 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
 
         if(result.isSuccess()) {
             inventoryAssetRepository.saveAll(inventoryAssets);
-            result.setMessage(scannedAssets.size() + " assets modified!");
+            result.addToMessages(scannedAssets.size() + " assets modified!");
         }
 
         return result;

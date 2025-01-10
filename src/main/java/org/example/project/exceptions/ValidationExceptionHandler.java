@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class PaymentExceptionHandler {
+public class ValidationExceptionHandler {
 
     @ExceptionHandler(GenericException.class)
     public ResponseEntity<String> handlePaymentException(GenericException paymentException) {

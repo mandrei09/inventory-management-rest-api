@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,14 +18,37 @@ public class Result<T> {
     protected boolean success = false;
 
     @Schema(description = "Message providing additional information on the result.", example = "Entity found successfully")
-    protected String message = null;
+    protected List<String> messages = new ArrayList<>();
 
     @Schema(description = "The object returned by the operation, if successful.")
     protected T object = null;
 
+    public Result<T> addToMessages(String message) {
+        messages.add(message);
+        return this;
+    }
+
+    @Schema(description = "Sets the result as entity not found with an optional error message.")
+    public Result<T> entityNotFound(List<String> errorMessages) {
+        this.messages.addAll(errorMessages);
+        this.success = false;
+        this.object = null;
+
+        return this;
+    }
+
     @Schema(description = "Sets the result as entity not found with an optional error message.")
     public Result<T> entityNotFound(String errorMessage) {
-        this.message = (this.message == null ? errorMessage : this.message + "\n" + errorMessage);
+        this.messages.add(errorMessage);
+        this.success = false;
+        this.object = null;
+
+        return this;
+    }
+
+    @Schema(description = "Sets the result as entity not found with an optional error message.")
+    public Result<T> entityNotFound(Long id, String errorMessage) {
+        this.messages.add(String.format("Id: %d, Message: %s", id, errorMessage));
         this.success = false;
         this.object = null;
 
@@ -31,7 +57,7 @@ public class Result<T> {
 
     @Schema(description = "Sets the result as entity found with the given object.")
     public Result<T> entityFound(T object) {
-        this.message = null;
+        this.messages = new ArrayList<>();
         this.success = true;
         this.object = object;
 

@@ -38,7 +38,7 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
         Company company = companyRepository.findById(dto.getCompanyId());
 
         if (company == null) {
-            return result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+            return result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -76,7 +76,7 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
             description = "Updates an existing Inventory entity using an InventoryDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully updated the entity"),
-                    @ApiResponse(responseCode = "404", description = "Company not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.COMPANY_NOT_FOUND)
             }
     )
     public Result<Inventory> updateFromDto(Inventory inventory, InventoryDtoUpdate dto) {
@@ -99,11 +99,11 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
         }
 
         if (dto.getCompanyId() != null) {
-            var company = companyRepository.findById(dto.getCompanyId()).orElse(null);
+            var company = companyRepository.findById(dto.getCompanyId());
             if (company != null) {
                 inventory.setCompany(company);
             } else {
-                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+                result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 

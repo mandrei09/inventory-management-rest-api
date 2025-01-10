@@ -39,7 +39,7 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
         Division division = divisionRepository.findById(dto.getDivisionId());
 
         if (division == null) {
-            return result.entityNotFound(StatusMessages.DIVISION_NOT_FOUND);
+            return result.entityNotFound(dto.getDivisionId(), StatusMessages.DIVISION_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -73,7 +73,7 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
             description = "Updates a CostCenter entity based on the provided CostCenterDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "CostCenter successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Division not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.DIVISION_NOT_FOUND)
             }
     )
     public Result<CostCenter> updateFromDto(CostCenter costCenter, CostCenterDtoUpdate dto) {
@@ -90,7 +90,7 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
             if (division != null) {
                 costCenter.setDivision(division);
             } else {
-                result.entityNotFound("Division not found!");
+                result.entityNotFound(dto.getDivisionId(), StatusMessages.DIVISION_NOT_FOUND);
             }
         }
 

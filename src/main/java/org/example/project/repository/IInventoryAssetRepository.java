@@ -20,54 +20,53 @@ public interface IInventoryAssetRepository extends IBaseEntityRepository<Invento
     List<InventoryAsset> findAllByInventoryIdAndCompanyId(Long inventoryId, Long companyId);
 
     @Query("select count(ia) from InventoryAsset ia " +
-            "where ia.inventory.id = :inventory and ia.costCenterFinal is not null and ia.isDeleted = false and ia.asset.isDeleted = false")
+            "where ia.inventory.id = :inventoryId and ia.costCenterFinal is not null and ia.isDeleted = false and ia.asset.isDeleted = false")
     Integer countAllAssetsScannedByInventoryId(Long inventoryId);
 
     @Query(value = """
-    SELECT COUNT(*)
-    FROM inventoryAsset ia
-    FULL JOIN (
-        SELECT ia.CostCenterIdFinal, ia.InventoryId, COUNT(*) AS ScannedAssets
-        FROM inventoryAsset ia
-        INNER JOIN Asset a ON a.IsDeleted = 0 AND ia.IsDeleted = 0
-        WHERE ia.CostCenterIdFinal IS NOT NULL
-        GROUP BY ia.CostCenterIdFinal, ia.InventoryId
-    ) S ON ia.CostCenterIdFinal = S.CostCenterIdFinal and S.InventoryId = :inventoryId
-    FULL JOIN (
-        SELECT ia.CostCenterIdFinal, ia.InventoryId, COUNT(*) AS AllAssets
-        FROM inventoryAsset ia
-        INNER JOIN Asset a ON a.IsDeleted = 0 AND ia.IsDeleted = 0
-        GROUP BY ia.CostCenterIdFinal
-    ) A ON ia.CostCenterIdFinal = A.CostCenterIdFinal and A.InventoryId = :inventoryId
-    WHERE A.AllAssets = S.ScannedAssets
+        SELECT COUNT(*)
+        FROM inventory_asset ia
+        INNER JOIN (
+            SELECT ia.cost_center_final_id, ia.inventory_id, COUNT(*) AS ScannedAssets
+            FROM inventory_asset ia
+            INNER JOIN asset a ON a.is_deleted = 0 AND ia.is_deleted= 0
+            WHERE ia.cost_center_final_id IS NOT NULL
+            GROUP BY ia.cost_center_final_id, ia.inventory_id
+        ) S ON ia.cost_center_final_id = S.cost_center_final_id AND S.inventory_id = :inventoryId
+        INNER JOIN (
+            SELECT ia.cost_center_final_id, ia.inventory_id, COUNT(*) AS AllAssets
+            FROM inventory_asset ia
+            INNER JOIN asset a ON a.is_deleted = 0 AND ia.is_deleted = 0
+            GROUP BY ia.cost_center_final_id, ia.inventory_id
+        ) A ON ia.cost_center_final_id = A.cost_center_final_id AND A.inventory_id = :inventoryId
+        WHERE A.AllAssets = S.ScannedAssets;
     """, nativeQuery = true)
     Integer countFullScannedCostCenters(@Param("inventoryId") Long inventoryId);
 
     @Query(value = """
-        SELECT SUM(ABS(ISNULL(ia.QuantityInitial, 0) - ISNULL(ia.QuantityFinal, 0)) * a.Value)
-        FROM inventoryAsset ia
-        INNER JOIN asset a 
-        ON a.assetid = ia.assetid AND a.isDeleted = 0 AND ia.isDeleted = 0
-        WHERE ia.inventoryId = :inventoryId 
-          AND ia.CostCenterIdFinal IS NOT NULL 
-          AND ia.QuantityFinal < ia.QuantityInitial
+        SELECT COALESCE(SUM(ABS(COALESCE(ia.quantity_initial, 0) - COALESCE(ia.quantity_final, 0)) * a.Value), 0.0)
+        FROM inventory_asset ia
+        INNER JOIN asset a
+        ON a.id = ia.asset_id AND a.is_deleted = 0 AND ia.is_deleted = 0
+        WHERE ia.inventory_id = :inventoryId
+        AND ia.cost_center_final_id IS NOT NULL
+        AND ia.quantity_final < ia.quantity_initial
         """, nativeQuery = true)
     Double calculateTotalDifferenceValue(@Param("inventoryId") Long inventoryId);
 
     @Query(value = """
-        SELECT * 
-        FROM inventoryAsset ia
-        INNER JOIN asset a 
-        ON a.assetid = ia.assetid AND ia.isDeleted = 0 AND a.isDeleted = 0
-        WHERE ia.InventoryId = :inventoryId 
+        SELECT ia.* 
+        FROM inventory_asset ia
+        INNER JOIN asset a ON a.id = ia.asset_id AND ia.is_deleted = 0 AND a.is_deleted = 0
+        WHERE ia.inventory_id = :inventoryId and ia.cost_center_final_id is not null
           AND (
-              (ISNULL(ia.QuantityFinal, 0.0) != ISNULL(ia.QuantityInitial, 0.0)) 
-              OR (ia.CostCenterIdInitial != ISNULL(ia.CostCenterIdFinal, 0))
+              (COALESCE(ia.quantity_final, 0.0) != COALESCE(ia.quantity_initial, 0.0)) 
+              OR (ia.cost_center_initial_id != COALESCE(ia.cost_center_final_id, 0))
           )
         """, nativeQuery = true)
     List<InventoryAsset> findByInventoryIdWithDifferences(@Param("inventoryId") Long inventoryId);
 
-    @Query("SELECT MAX(ia.modifiedAt) FROM InventoryAsset ia WHERE ia.inventory.id = :inventory")
+    @Query("SELECT MAX(ia.modifiedAt) FROM InventoryAsset ia WHERE ia.inventory.id = :inventoryId")
     Date findMaxModifiedAtByInventoryId(Long inventoryId);
 
 }

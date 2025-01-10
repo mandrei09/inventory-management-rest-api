@@ -36,7 +36,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             }
     )
     public List<Employee> getAll() {
-        return employeeRepository.findAllByIsDeletedFalse().toList();
+        return employeeRepository.findAllByIsDeletedFalse();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
 
         if(dto.getManagerId() != null) {
             if (manager == null) {
-                result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
+                result.entityNotFound(dto.getManagerId(), StatusMessages.MANAGER_NOT_FOUND);
             }
         }
 
@@ -66,7 +66,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             company = companyRepository.findById(dto.getCompanyId());
 
             if (company == null) {
-                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+                result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 
@@ -135,7 +135,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             if (manager != null) {
                 employee.setManager(manager);
             } else {
-                result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
+                result.entityNotFound(dto.getManagerId(), StatusMessages.MANAGER_NOT_FOUND);
             }
         }
 
@@ -145,7 +145,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             if (company != null) {
                 employee.setCompany(company);
             } else {
-                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+                result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 
@@ -153,7 +153,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             employee.setBirthDate(dto.getBirthDate());
         }
 
-        if(result.getMessage() == null) result.entityFound(employee);
+        if(result.getMessages() == null) result.entityFound(employee);
         return result;
     }
 }

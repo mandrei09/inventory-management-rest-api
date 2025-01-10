@@ -39,12 +39,12 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
         Employee manager = employeeRepository.findById(dto.getManagerId());
 
         if (manager == null) {
-            return result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
+            return result.entityNotFound(dto.getManagerId(), StatusMessages.MANAGER_NOT_FOUND);
         }
 
         Integer managerCompaniesCount = companyRepository.countAllByManagerId(manager.getId());
         if (managerCompaniesCount > 0) {
-            return result.entityNotFound(StatusMessages.MANAGER_EXISTS);
+            return result.entityNotFound(manager.getId(), StatusMessages.MANAGER_EXISTS);
         }
 
         return result.entityFound(
@@ -78,7 +78,7 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
             description = "Updates a Company entity based on the provided CompanyDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Company successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Manager not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.MANAGER_NOT_FOUND)
             }
     )
     public Result<Company> updateFromDto(Company company, CompanyDtoUpdate dto) {
@@ -96,7 +96,7 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
                 company.setManager(manager);
             }
             else {
-                result.entityNotFound("Manager not found!");
+                result.entityNotFound(dto.getManagerId(), StatusMessages.MANAGER_NOT_FOUND);
             }
         }
 

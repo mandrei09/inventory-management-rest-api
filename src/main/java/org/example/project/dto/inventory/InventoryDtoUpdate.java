@@ -25,7 +25,7 @@ public class InventoryDtoUpdate implements IBaseDtoUpdate {
     private String info;
 
     @Schema(description = "The ID of the company that owns the inventory.", example = "1")
-    private Integer companyId;
+    private Long companyId;
 
     @Schema(description = "The start date of the inventory period.", example = "2025-01-01")
     private Date startDate;

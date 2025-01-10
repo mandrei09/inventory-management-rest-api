@@ -32,7 +32,7 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
             description = "Maps a DivisionDtoCreate object to a Division entity.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Division successfully mapped"),
-                    @ApiResponse(responseCode = "404", description = "Department not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.DEPARTMENT_NOT_FOUND)
             }
     )
     public Result<Division> mapToModel(DivisionDtoCreate dto) {
@@ -40,7 +40,7 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
 
         Department department = departmentRepository.findById(dto.getDepartmentId());
         if(department == null) {
-            return result.entityNotFound(StatusMessages.DEPARTMENT_NOT_FOUND);
+            return result.entityNotFound(dto.getDepartmentId(), StatusMessages.DEPARTMENT_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -74,7 +74,7 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
             description = "Updates a Division entity based on the provided DivisionDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Division successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Department not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.DEPARTMENT_NOT_FOUND)
             }
     )
     public Result<Division> updateFromDto(Division division, DivisionDtoUpdate dto) {
@@ -91,7 +91,7 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
             if (department != null) {
                 division.setDepartment(department);
             } else {
-                result.entityNotFound("Department not found!");
+                result.entityNotFound(dto.getDepartmentId(), StatusMessages.DEPARTMENT_NOT_FOUND);
             }
         }
 

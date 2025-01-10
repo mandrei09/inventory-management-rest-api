@@ -40,7 +40,7 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
         Company company = companyRepository.findById(dto.getCompanyId());
 
         if (company == null) {
-            return result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+            return result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -74,7 +74,7 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
             description = "Updates a Department entity based on the provided DepartmentDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Department successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Company not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.COMPANY_NOT_FOUND)
             }
     )
     public Result<Department> updateFromDto(Department department, DepartmentDtoUpdate dto) {
@@ -91,7 +91,7 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
             if (company != null) {
                 department.setCompany(company);
             } else {
-                result.entityNotFound("Company not found!");
+                result.entityNotFound(dto.getCompanyId(), StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 

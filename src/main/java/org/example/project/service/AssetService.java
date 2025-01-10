@@ -42,7 +42,7 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
         CostCenter costCenter = costCenterRepository.findById(dto.getCostCenterId());
 
         if (costCenter == null) {
-            return result.entityNotFound(StatusMessages.COST_CENTER_NOT_FOUND);
+            return result.entityNotFound(dto.getCostCenterId(), StatusMessages.COST_CENTER_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -80,7 +80,7 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
             description = "Updates an Asset entity based on the provided AssetDtoUpdate object.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Asset successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Cost center not found")
+                    @ApiResponse(responseCode = "404", description = StatusMessages.COST_CENTER_NOT_FOUND)
             }
     )
     public Result<Asset> updateFromDto(Asset asset, AssetDtoUpdate dto) {
@@ -108,7 +108,7 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
                 asset.setCostCenter(costCenter);
             }
             else {
-                result.entityNotFound("Cost center not found!");
+                result.entityNotFound(dto.getCostCenterId(), StatusMessages.COST_CENTER_NOT_FOUND);
             }
         }
 

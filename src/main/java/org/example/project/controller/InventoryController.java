@@ -55,21 +55,31 @@ public class InventoryController extends BaseController<Inventory, InventoryDtoC
                 return ResponseEntity.created(uri).body(result);
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(assetsInserted.getMessage());
+                    .body(assetsInserted.getMessages());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
+                .body(result != null ? result.getMessages() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Get inventory details", description = "Retrieve detailed information about an active inventory and its associated assets.")
     @GetMapping("/detail/{inventoryId}")
-    public ResponseEntity<Result<InventoryDetail>> inventoryDetail(@PathVariable Long inventoryId) {
-        return ResponseEntity.ok().body(inventoryAssetService.getInventoryDetail(inventoryId));
+    public ResponseEntity<?> inventoryDetail(@PathVariable Long inventoryId) {
+        Result<InventoryDetail> result = inventoryAssetService.getInventoryDetail(inventoryId);
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result.getObject());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Set scanned assets for an inventory", description = "Update the scanned status of assets in an active inventory.")
     @PutMapping("/setassetsscanned/{inventoryId}")
     public ResponseEntity<?> setAssetsScanned(@PathVariable Long inventoryId, @RequestBody @Valid List<ScanAssetDtoCreate> inventoryDto) {
-        return ResponseEntity.ok().body(inventoryAssetService.setAssetsScanned(inventoryId, inventoryDto));
+        Result<Boolean> result = inventoryAssetService.setAssetsScanned(inventoryId, inventoryDto);
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
 }

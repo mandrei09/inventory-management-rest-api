@@ -2,6 +2,7 @@ package org.example.project.repository.generic;
 
 import org.example.project.model.embedable.InventoryAssetId;
 import org.example.project.model.generic.BaseEntity;
+import org.example.project.result.Result;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 @NoRepositoryBean
 public interface IBaseEntityRepository<T extends BaseEntity> extends JpaRepository<T, Integer>, JpaSpecificationExecutor<T> {
-    Stream<T> findAllByIsDeletedFalse();
+    List<T> findAllByIsDeletedFalse();
     List<T> findAll(Specification<T> spec);
 
     T findById(Long id);

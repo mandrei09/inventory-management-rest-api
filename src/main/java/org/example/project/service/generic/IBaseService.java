@@ -14,6 +14,7 @@ public interface IBaseService<Model extends BaseEntity, IDtoCreate extends IBase
     extends IMapping<Model, IDtoCreate, IDtoUpdate> {
     Result<List<Model>> findEntitiesByFilters(Map<String, String> filters);
     Result<Model> create(IDtoCreate dto);
+    Result<List<Model>> createMany(List<IDtoCreate> dtoList);
     Model create(Model model);
     Result<Model> update(Long id, IDtoUpdate dto);
     Result<Model> softDelete(Long id);
