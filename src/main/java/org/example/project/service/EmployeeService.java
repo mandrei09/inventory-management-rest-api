@@ -118,6 +118,8 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
     public Result<Employee> updateFromDto(Employee employee, EmployeeDtoUpdate dto) {
         Result<Employee> result = new Result<>();
 
+        result.setSuccess(true);
+
         if (dto.getInternalCode() != null)
             employee.setInternalCode(dto.getInternalCode().trim());
 

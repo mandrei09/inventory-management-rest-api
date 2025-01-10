@@ -82,6 +82,8 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
     public Result<Inventory> updateFromDto(Inventory inventory, InventoryDtoUpdate dto) {
         Result<Inventory> result = new Result<>();
 
+        result.setSuccess(true);
+
         if (dto.getCode() != null) {
             inventory.setCode(dto.getCode().trim());
         }

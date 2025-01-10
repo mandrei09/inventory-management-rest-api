@@ -80,6 +80,8 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
     public Result<Division> updateFromDto(Division division, DivisionDtoUpdate dto) {
         Result<Division> result = new Result<>();
 
+        result.setSuccess(true);
+
         if (dto.getCode() != null) {
             division.setCode(dto.getCode().trim());
         }

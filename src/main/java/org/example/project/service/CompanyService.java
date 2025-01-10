@@ -84,6 +84,8 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
     public Result<Company> updateFromDto(Company company, CompanyDtoUpdate dto) {
         Result<Company> result = new Result<>();
 
+        result.setSuccess(true);
+
         if(dto.getCode() != null) {
             company.setCode(dto.getCode().trim());
         }

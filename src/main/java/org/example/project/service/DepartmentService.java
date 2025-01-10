@@ -80,6 +80,8 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
     public Result<Department> updateFromDto(Department department, DepartmentDtoUpdate dto) {
         Result<Department> result = new Result<>();
 
+        result.setSuccess(true);
+
         if (dto.getCode() != null) {
             department.setCode(dto.getCode().trim());
         }

@@ -86,6 +86,8 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
     public Result<Asset> updateFromDto(Asset asset, AssetDtoUpdate dto) {
         Result<Asset> result = new Result<>();
 
+        result.setSuccess(true);
+
         if(dto.getCode() != null) {
             asset.setCode(dto.getCode().trim());
         }

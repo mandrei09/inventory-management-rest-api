@@ -79,6 +79,8 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
     public Result<CostCenter> updateFromDto(CostCenter costCenter, CostCenterDtoUpdate dto) {
         Result<CostCenter> result = new Result<>();
 
+        result.setSuccess(true);
+
         if (dto.getCode() != null) {
             costCenter.setCode(dto.getCode().trim());
         }

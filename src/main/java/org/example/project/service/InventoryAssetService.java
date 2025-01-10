@@ -120,6 +120,8 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
     public Result<InventoryAsset> updateFromDto(InventoryAsset inventoryAsset, InventoryAssetDtoUpdate dto) {
         Result<InventoryAsset> result = new Result<>();
 
+        result.setSuccess(true);
+
         if(dto.getInventoryId() != null) {
             var inventory = inventoryRepository.findById(dto.getInventoryId());
             if(inventory != null) {
@@ -158,6 +160,14 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
             else {
                 result.entityNotFound(dto.getCostCenterFinalId(), StatusMessages.COST_CENTER_FINAL_NOT_FOUND);
             }
+        }
+
+        if(dto.getQuantityInitial() != null) {
+            inventoryAsset.setQuantityInitial(dto.getQuantityInitial());
+        }
+
+        if(dto.getQuantityFinal() != null) {
+            inventoryAsset.setQuantityFinal(dto.getQuantityFinal());
         }
 
         return result;
