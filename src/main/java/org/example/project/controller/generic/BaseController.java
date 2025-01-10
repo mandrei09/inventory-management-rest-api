@@ -9,9 +9,10 @@ import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Validated
 @Tag(name = "Base Management", description = "API for managing generic entities")
 @RequestMapping("/api")
 public abstract class BaseController
@@ -32,10 +34,17 @@ public abstract class BaseController
 
     @Operation(summary = "Get all entities by filters", description = "Retrieve a list of entities filtered by the specified parameters.")
     @GetMapping("/all")
-    public ResponseEntity<List<Model>> findByFilters(
+    public ResponseEntity<?> findByFilters(
             @RequestParam(required = false)
             @Parameter(description = "Filters to apply to the query") Map<String, String> filters) {
-        return ResponseEntity.ok().body(service.findEntitiesByFilters(filters));
+
+        Result<List<Model>> result = service.findEntitiesByFilters(filters);
+        if(result != null && result.isSuccess()) {
+            return ResponseEntity.ok().body(result.getObject());
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Get entity by ID", description = "Retrieve a specific entity by its ID.")
@@ -60,7 +69,7 @@ public abstract class BaseController
             return ResponseEntity.created(uri).body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Update an existing entity", description = "Update an existing entity with the provided DTO by entity ID.")
@@ -74,7 +83,7 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Soft delete an entity", description = "Soft delete an entity by ID, marking it as deleted without actually removing it from the database.")
@@ -86,30 +95,30 @@ public abstract class BaseController
             return ResponseEntity.ok().body(result.getObject());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Delete an entity", description = "Delete an entity permanently by its ID.")
     @DeleteMapping("/delete/{entityId}")
-    public ResponseEntity<?> delete(@PathVariable @Parameter(description = "The ID of the entity to delete") Long entityId) {
+    public ResponseEntity<String> delete(@PathVariable @Parameter(description = "The ID of the entity to delete") Long entityId) {
         Result<Model> result = service.delete(entityId);
 
         if (result != null && result.isSuccess()) {
-            return ResponseEntity.ok().body(result.getObject());
+            return ResponseEntity.ok().body(StatusMessages.entityDeleted(result.getObject().getClass().getSimpleName()));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Clean up entities", description = "Hard delete entities based on a date filter.")
     @DeleteMapping("/cleanup")
-    public ResponseEntity<?> cleanUp(@RequestParam(required = false) @Parameter(description = "Delete entities created after this date") Date dateAfter) {
-        Result<Integer> result = service.cleanUp(dateAfter);
+    public ResponseEntity<?> cleanUp(@RequestParam(required = false) @Parameter(description = "Delete entities created after this date") Date dateBefore) {
+        Result<Integer> result = service.cleanUp(dateBefore);
 
         if (result != null && result.isSuccess()) {
             return ResponseEntity.ok().body(result.getObject() + " entities deleted!");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body((result != null && result.getMessage() != null) ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 }

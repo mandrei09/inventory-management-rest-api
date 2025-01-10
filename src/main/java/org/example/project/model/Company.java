@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,11 @@ public class Company extends CodeNameEntity {
     @Schema(description = "The manager of the company.", example = "John Doe")
     private Employee manager;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Department> departments;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "company")
+    private List<Employee> employees;
 }

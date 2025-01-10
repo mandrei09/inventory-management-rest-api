@@ -5,15 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.example.project.dto.department.DepartmentDtoCreate;
 import org.example.project.dto.department.DepartmentDtoUpdate;
 import org.example.project.model.Company;
-import org.example.project.model.CostCenter;
 import org.example.project.model.Department;
-import org.example.project.model.Employee;
 import org.example.project.repository.ICompanyRepository;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IDepartmentService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,7 +40,7 @@ public class DepartmentService extends BaseService<Department, DepartmentDtoCrea
         Company company = companyRepository.findById(dto.getCompanyId());
 
         if (company == null) {
-            return result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
         }
 
         return result.entityFound(

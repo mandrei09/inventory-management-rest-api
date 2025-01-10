@@ -19,7 +19,7 @@ import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IInventoryAssetService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.example.project.utils.InventoryStatus;
 import org.springframework.stereotype.Service;
 
@@ -56,24 +56,24 @@ public class InventoryAssetService extends BaseService<InventoryAsset, Inventory
 
         Inventory inventory = inventoryRepository.findById(dto.getInventoryId());
         if(inventory == null) {
-            result.entityNotFound(ErrorCodes.INVENTORY_NOT_FOUND);
+            result.entityNotFound(StatusMessages.INVENTORY_NOT_FOUND);
         }
 
         Asset asset = assetRepository.findById(dto.getAssetId());
         if(asset == null) {
-            result.entityNotFound(ErrorCodes.ASSET_NOT_FOUND);
+            result.entityNotFound(StatusMessages.ASSET_NOT_FOUND);
         }
 
         CostCenter costCenterInitial = costCenterRepository.findById(dto.getCostCenterInitialId());
 
         if (costCenterInitial == null) {
-            return result.entityNotFound(ErrorCodes.COST_CENTER_INITIAL_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.COST_CENTER_INITIAL_NOT_FOUND);
         }
 
         CostCenter costCenterFinal = costCenterRepository.findById(dto.getCostCenterFinalId());
 
         if (costCenterFinal == null) {
-            return result.entityNotFound(ErrorCodes.COST_CENTER_FINAL_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.COST_CENTER_FINAL_NOT_FOUND);
         }
 
         if(!result.isSuccess())

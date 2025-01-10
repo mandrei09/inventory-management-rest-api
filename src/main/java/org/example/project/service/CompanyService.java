@@ -11,10 +11,8 @@ import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.ICompanyService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class CompanyService extends BaseService<Company, CompanyDtoCreate, CompanyDtoUpdate> implements ICompanyService {
@@ -41,7 +39,12 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
         Employee manager = employeeRepository.findById(dto.getManagerId());
 
         if (manager == null) {
-            return result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
+        }
+
+        Integer managerCompaniesCount = companyRepository.countAllByManagerId(manager.getId());
+        if (managerCompaniesCount > 0) {
+            return result.entityNotFound(StatusMessages.MANAGER_EXISTS);
         }
 
         return result.entityFound(

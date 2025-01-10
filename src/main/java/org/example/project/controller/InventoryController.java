@@ -12,7 +12,7 @@ import org.example.project.model.Inventory;
 import org.example.project.result.Result;
 import org.example.project.service.InventoryAssetService;
 import org.example.project.service.InventoryService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/inventories")
@@ -59,7 +58,7 @@ public class InventoryController extends BaseController<Inventory, InventoryDtoC
                     .body(assetsInserted.getMessage());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(result != null ? result.getMessage() : ErrorCodes.UNKNOWN_ERROR);
+                .body(result != null ? result.getMessage() : StatusMessages.UNKNOWN_ERROR);
     }
 
     @Operation(summary = "Get inventory details", description = "Retrieve detailed information about an active inventory and its associated assets.")

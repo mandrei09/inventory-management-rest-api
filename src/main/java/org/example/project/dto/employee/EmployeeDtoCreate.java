@@ -38,7 +38,6 @@ public class EmployeeDtoCreate implements IBaseDtoCreate {
     private Long managerId;
 
     @Schema(description = "The ID of the company to which the employee belongs.", example = "1")
-    @NotNull(message = "CompanyId cannot be null.")
     private Long companyId;
 
     @Schema(description = "The birth date of the employee.", example = "1980-12-15")

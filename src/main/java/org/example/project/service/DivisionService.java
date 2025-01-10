@@ -6,13 +6,12 @@ import org.example.project.dto.division.DivisionDtoCreate;
 import org.example.project.dto.division.DivisionDtoUpdate;
 import org.example.project.model.Department;
 import org.example.project.model.Division;
-import org.example.project.model.Employee;
 import org.example.project.repository.IDepartmentRepository;
 import org.example.project.repository.IDivisionRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IDivisionService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,7 +40,7 @@ public class DivisionService extends BaseService<Division, DivisionDtoCreate, Di
 
         Department department = departmentRepository.findById(dto.getDepartmentId());
         if(department == null) {
-            return result.entityNotFound(ErrorCodes.DEPARTMENT_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.DEPARTMENT_NOT_FOUND);
         }
 
         return result.entityFound(

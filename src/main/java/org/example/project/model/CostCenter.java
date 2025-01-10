@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class CostCenter extends CodeNameEntity {
     @Schema(description = "The division to which this cost center belongs.", example = "Finance Division")
     private Division division;
 
+    @JsonManagedReference
     @ManyToMany
     @JoinTable(
             name = "employee_cost_center",
@@ -37,6 +39,7 @@ public class CostCenter extends CodeNameEntity {
     @Schema(description = "The employees assigned to this cost center.")
     private Set<Employee> employees = new HashSet<>();
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "costCenter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Asset> assets;
 

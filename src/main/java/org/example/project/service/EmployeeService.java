@@ -11,7 +11,7 @@ import org.example.project.repository.IEmployeeRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IEmployeeService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,23 +45,29 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             description = "Converts an EmployeeDtoCreate object into an Employee entity.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully mapped DTO to entity"),
-                    @ApiResponse(responseCode = "404", description = ErrorCodes.MANAGER_NOT_FOUND)
+                    @ApiResponse(responseCode = "404", description = StatusMessages.MANAGER_NOT_FOUND)
             }
     )
     public Result<Employee> mapToModel(EmployeeDtoCreate dto) {
         Result<Employee> result = new Result<>();
         result.setSuccess(true);
 
-        Employee manager = employeeRepository.findById(dto.getManagerId());
+        Employee manager = null; Company company = null;
 
-        if (manager == null) {
-            result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
+        manager = employeeRepository.findById(dto.getManagerId());
+
+        if(dto.getManagerId() != null) {
+            if (manager == null) {
+                result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
+            }
         }
 
-        Company company = companyRepository.findById(dto.getCompanyId());
+        if(dto.getCompanyId() != null) {
+            company = companyRepository.findById(dto.getCompanyId());
 
-        if (company == null) {
-            result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+            if (company == null) {
+                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
+            }
         }
 
         if(!result.isSuccess())
@@ -129,16 +135,17 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             if (manager != null) {
                 employee.setManager(manager);
             } else {
-                result.entityNotFound(ErrorCodes.MANAGER_NOT_FOUND);
+                result.entityNotFound(StatusMessages.MANAGER_NOT_FOUND);
             }
         }
 
         if (dto.getCompanyId() != null) {
             var company = companyRepository.findById(dto.getCompanyId());
+
             if (company != null) {
                 employee.setCompany(company);
             } else {
-                result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 
@@ -146,6 +153,7 @@ public class EmployeeService extends BaseService<Employee, EmployeeDtoCreate, Em
             employee.setBirthDate(dto.getBirthDate());
         }
 
+        if(result.getMessage() == null) result.entityFound(employee);
         return result;
     }
 }

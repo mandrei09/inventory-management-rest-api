@@ -1,6 +1,7 @@
 package org.example.project.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ public class Division extends CodeNameEntity {
     @Schema(description = "The department to which this division belongs.", example = "Engineering")
     private Department department;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CostCenter> costCenters;
 }

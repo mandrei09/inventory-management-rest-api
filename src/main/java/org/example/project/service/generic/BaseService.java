@@ -9,12 +9,15 @@ import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
 import org.example.project.repository.generic.IBaseEntityRepository;
 import org.example.project.result.Result;
+import org.example.project.utils.StatusMessages;
 import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
+import org.hibernate.query.sqm.PathElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +26,7 @@ public abstract class BaseService
         <Model extends BaseEntity, DtoCreate extends IBaseDtoCreate, DtoUpdate extends IBaseDtoUpdate>
         implements IBaseService<Model, DtoCreate, DtoUpdate>, IAppUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
 
     private final IBaseEntityRepository<Model> repository;
 
@@ -32,7 +35,6 @@ public abstract class BaseService
     }
 
     @Override
-    @Transactional()
     @Operation(
             summary = "Find entities by filters",
             description = "Retrieves a list of entities based on the specified filters.",
@@ -41,12 +43,19 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters")
             }
     )
-    public List<Model> findEntitiesByFilters(@Parameter(description = "Map of filter parameters") Map<String, String> filters) {
+    public Result<List<Model>> findEntitiesByFilters(@Parameter(description = "Map of filter parameters") Map<String, String> filters) {
+        Result<List<Model>> result = new Result<>();
+
         if(filters != null && !filters.isEmpty()) {
-            return repository.findAll(
-                    Specification.where(GenericSpecification.getQueryableAnd(filters)));
+            try {
+                return result.entityFound(repository.findAll(Specification.where(GenericSpecification.getQueryableAnd(filters))));
+            }
+            catch (Exception ex) {
+                return result.entityNotFound(ex.getMessage());
+            }
         }
-        return repository.findAllByIsDeletedFalse().toList();
+
+        return result.entityFound(repository.findAllByIsDeletedFalse().toList());
     }
 
     @Operation(
@@ -115,7 +124,7 @@ public abstract class BaseService
         Result<Model> result = new Result<>();
 
         Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return result.entityNotFound(id + " entity not found!");
+        if (databaseEntity == null) return result.entityNotFound(StatusMessages.entityNotFound(id));
 
         result = updateFromDto(databaseEntity, dto);
 
@@ -140,7 +149,7 @@ public abstract class BaseService
         Result<Model> result = new Result<>();
 
         Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return result.entityNotFound(id + " entity not found!");
+        if (databaseEntity == null) return result.entityNotFound(StatusMessages.entityNotFound(id));
 
         databaseEntity.setDeleted(true);
         databaseEntity.setModifiedAt(new Date());
@@ -161,7 +170,7 @@ public abstract class BaseService
         Result<Model> result = new Result<>();
 
         Model databaseEntity = repository.findById(id);
-        if (databaseEntity == null) return result.entityNotFound(id + " entity not found!");
+        if (databaseEntity == null) return result.entityNotFound(StatusMessages.entityNotFound(id));
 
         repository.delete(databaseEntity);
         return result.entityFound(databaseEntity);
@@ -176,12 +185,12 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "400", description = "Invalid date provided")
             }
     )
-    public Result<Integer> cleanUp(@Parameter(description = "Date after which to clean up entities") Date dateAfter) {
+    public Result<Integer> cleanUp(@Parameter(description = "Date after which to clean up entities") Date dateBefore) {
         Result<Integer> result = new Result<>();
 
-        if(dateAfter == null) dateAfter = new Date();
+        if(dateBefore == null) dateBefore = new Date();
 
-        Integer entitiesDeleted = repository.deleteAllByIsDeletedTrueAndCreatedAtBefore(dateAfter);
+        Integer entitiesDeleted = repository.deleteAllByIsDeletedTrueAndCreatedAtBefore(dateBefore);
         if(entitiesDeleted != null) {
             result.entityFound(entitiesDeleted);
         }

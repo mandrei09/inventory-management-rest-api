@@ -6,12 +6,11 @@ import org.example.project.dto.costCenter.CostCenterDtoCreate;
 import org.example.project.dto.costCenter.CostCenterDtoUpdate;
 import org.example.project.model.CostCenter;
 import org.example.project.model.Division;
-import org.example.project.model.Employee;
 import org.example.project.repository.IDivisionRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.ICostCenterService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +39,7 @@ public class CostCenterService extends BaseService<CostCenter, CostCenterDtoCrea
         Division division = divisionRepository.findById(dto.getDivisionId());
 
         if (division == null) {
-            return result.entityNotFound(ErrorCodes.DIVISION_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.DIVISION_NOT_FOUND);
         }
 
         return result.entityFound(

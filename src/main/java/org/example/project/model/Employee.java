@@ -1,5 +1,6 @@
 package org.example.project.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import org.example.project.model.generic.BaseEntity;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -31,13 +33,13 @@ public class Employee extends BaseEntity {
     @Schema(description = "Email address of the employee.", example = "john.doe@example.com")
     private String email;
 
-    @JsonManagedReference
-    @OneToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id", referencedColumnName = "id")
     @Schema(description = "Manager of the employee.", example = "EMP456")
     private Employee manager;
 
-    @JsonManagedReference
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "company_id", referencedColumnName = "id")
     @Schema(description = "The company where the employee works.", example = "TechCorp")
@@ -46,7 +48,12 @@ public class Employee extends BaseEntity {
     @Schema(description = "Birth date of the employee.", example = "1985-08-15")
     private Date birthDate;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "employees")
     @Schema(description = "Cost centers associated with the employee.")
     private Set<CostCenter> costCenters = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "manager")
+    private List<Employee> subordinates;
 }

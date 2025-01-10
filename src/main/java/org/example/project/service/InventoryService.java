@@ -11,7 +11,7 @@ import org.example.project.repository.IInventoryRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IInventoryService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +38,7 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
         Company company = companyRepository.findById(dto.getCompanyId());
 
         if (company == null) {
-            return result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
         }
 
         return result.entityFound(
@@ -103,7 +103,7 @@ public class InventoryService extends BaseService<Inventory, InventoryDtoCreate,
             if (company != null) {
                 inventory.setCompany(company);
             } else {
-                result.entityNotFound(ErrorCodes.COMPANY_NOT_FOUND);
+                result.entityNotFound(StatusMessages.COMPANY_NOT_FOUND);
             }
         }
 

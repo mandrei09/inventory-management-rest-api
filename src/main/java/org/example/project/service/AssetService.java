@@ -7,13 +7,12 @@ import org.example.project.dto.asset.AssetDtoCreate;
 import org.example.project.dto.asset.AssetDtoUpdate;
 import org.example.project.model.Asset;
 import org.example.project.model.CostCenter;
-import org.example.project.model.Employee;
 import org.example.project.repository.IAssetRepository;
 import org.example.project.repository.ICostCenterRepository;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.service.interfaces.IAssetService;
-import org.example.project.utils.ErrorCodes;
+import org.example.project.utils.StatusMessages;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public class AssetService extends BaseService<Asset, AssetDtoCreate, AssetDtoUpd
         CostCenter costCenter = costCenterRepository.findById(dto.getCostCenterId());
 
         if (costCenter == null) {
-            return result.entityNotFound(ErrorCodes.COST_CENTER_NOT_FOUND);
+            return result.entityNotFound(StatusMessages.COST_CENTER_NOT_FOUND);
         }
 
         return result.entityFound(
