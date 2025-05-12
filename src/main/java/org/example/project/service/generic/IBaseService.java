@@ -12,7 +12,7 @@ import java.util.Map;
 
 public interface IBaseService<Model extends BaseEntity, IDtoCreate extends IBaseDtoCreate, IDtoUpdate extends IBaseDtoUpdate>
     extends IMapping<Model, IDtoCreate, IDtoUpdate> {
-    Result<List<Model>> findEntitiesByFilters(Map<String, String> filters);
+    Result<?> findEntitiesByFilters(Map<String, String> filters, Integer page, Integer perPage);
     Result<Model> create(IDtoCreate dto);
     Result<List<Model>> createMany(List<IDtoCreate> dtoList);
     Model create(Model model);

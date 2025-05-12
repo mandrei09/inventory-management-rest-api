@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,14 +35,18 @@ public abstract class BaseController
 
     @Operation(summary = "Get all entities by filters", description = "Retrieve a list of entities filtered by the specified parameters.")
     @GetMapping("/all")
-    public ResponseEntity<?> findByFilters(
-            @RequestParam(required = false)
-            @Parameter(description = "Filters to apply to the query") Map<String, String> filters) {
+    public ResponseEntity<?> findByFiltersAndPagination(@RequestParam Map<String, String> allParams) {
+        Integer page = allParams.containsKey("page") ? Integer.parseInt(allParams.get("page")) : null;
+        Integer perPage = allParams.containsKey("perPage") ? Integer.parseInt(allParams.get("perPage")) : null;
 
-        Result<List<Model>> result = service.findEntitiesByFilters(filters);
-        if(result != null && result.isSuccess()) {
-            return ResponseEntity.ok()
-                    .body(result.getObject());
+        Map<String, String> filters = new HashMap<>(allParams);
+        filters.remove("page");
+        filters.remove("perPage");
+
+        Result<?> result = service.findEntitiesByFilters(filters, page, perPage);
+
+        if (result != null && result.isSuccess()) {
+            return ResponseEntity.ok(result.getObject());
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
