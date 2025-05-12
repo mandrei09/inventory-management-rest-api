@@ -20,6 +20,7 @@ import java.util.Date;
 public class Asset extends CodeNameEntity {
 
     @Schema(description = "The value of the asset.", example = "1000.00")
+    @Column(name = "\"value\"")
     private Double value;
 
     @JsonBackReference
