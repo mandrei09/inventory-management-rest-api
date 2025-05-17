@@ -60,8 +60,13 @@ public abstract class BaseService
                     ? PageRequest.of(page - 1, perPage, sort)
                     : Pageable.unpaged();
 
-            Specification<Model> spec = Specification.where(GenericSpecification.getQueryableAnd(filters));
-            Page<Model> pageResult = repository.findAll(spec, pageable);
+            Specification<Model> filterSpec = Specification.where(GenericSpecification.getQueryableAnd(filters));
+            Specification<Model> notDeletedSpec = (root, query, cb) -> cb.isFalse(root.get("isDeleted"));
+
+            // Combine both specifications
+            Specification<Model> finalSpec = filterSpec.and(notDeletedSpec);
+
+            Page<Model> pageResult = repository.findAll(finalSpec, pageable);
 
             if (pageable.isUnpaged()) {
                 return result.entityFound(pageResult.getContent());
