@@ -48,12 +48,12 @@ public class Employee extends BaseEntity {
     @Schema(description = "Birth date of the employee.", example = "1985-08-15")
     private Date birthDate;
 
-    @JsonManagedReference
+    @JsonBackReference
     @ManyToMany(mappedBy = "employees")
     @Schema(description = "Cost centers associated with the employee.")
     private Set<CostCenter> costCenters = new HashSet<>();
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "manager")
     private List<Employee> subordinates;
 }

@@ -29,7 +29,7 @@ public class CostCenter extends CodeNameEntity {
     @Schema(description = "The division to which this cost center belongs.", example = "Finance Division")
     private Division division;
 
-    @JsonManagedReference
+    @JsonBackReference
     @ManyToMany
     @JoinTable(
             name = "employee_cost_center",
@@ -39,7 +39,7 @@ public class CostCenter extends CodeNameEntity {
     @Schema(description = "The employees assigned to this cost center.")
     private Set<Employee> employees = new HashSet<>();
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "costCenter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Asset> assets;
 

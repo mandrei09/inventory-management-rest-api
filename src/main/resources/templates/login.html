@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/font-awesome/6.5.2/css/all.min.css"/>
+    <style>
+        html, body {
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center bg-light" style="height: 100vh;">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <form class="form-signin border rounded p-4 shadow bg-white" method="post" th:action="@{/perform_login}">
+                <h2 class="text-center mb-4">Sign in</h2>
+
+                <p th:if="${param.error}" class="text-danger text-center">Invalid user or password</p>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+
+                <div class="d-grid">
+                    <button class="btn btn-primary" type="submit">Sign in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

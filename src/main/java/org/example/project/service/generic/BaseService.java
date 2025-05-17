@@ -8,12 +8,17 @@ import org.example.project.dto.generic.IBaseDtoCreate;
 import org.example.project.dto.generic.IBaseDtoUpdate;
 import org.example.project.model.generic.BaseEntity;
 import org.example.project.repository.generic.IBaseEntityRepository;
+import org.example.project.result.PaginatedResult;
 import org.example.project.result.Result;
 import org.example.project.utils.StatusMessages;
 import org.example.project.utils.GenericSpecification;
 import org.example.project.utils.interfaces.IAppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -42,19 +47,42 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters")
             }
     )
-    public Result<List<Model>> findEntitiesByFilters(@Parameter(description = "Map of filter parameters") Map<String, String> filters) {
-        Result<List<Model>> result = new Result<>();
+    public Result<?> findEntities(Map<String, String> filters, Integer page, Integer perPage, String sortBy, String sortDirection) {
+        Result<Object> result = new Result<>();
 
-        if(filters != null && !filters.isEmpty()) {
-            try {
-                return result.entityFound(repository.findAll(Specification.where(GenericSpecification.getQueryableAnd(filters))));
+        try {
+            Sort sort = Sort.unsorted();
+            if (sortBy != null && !sortBy.isBlank()) {
+                sort = Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
             }
-            catch (Exception ex) {
-                return result.entityNotFound(ex.getMessage());
+
+            Pageable pageable = (page != null && perPage != null)
+                    ? PageRequest.of(page - 1, perPage, sort)
+                    : Pageable.unpaged();
+
+            Specification<Model> filterSpec = Specification.where(GenericSpecification.getQueryableAnd(filters));
+            Specification<Model> notDeletedSpec = (root, query, cb) -> cb.isFalse(root.get("isDeleted"));
+
+            // Combine both specifications
+            Specification<Model> finalSpec = filterSpec.and(notDeletedSpec);
+
+            Page<Model> pageResult = repository.findAll(finalSpec, pageable);
+
+            if (pageable.isUnpaged()) {
+                return result.entityFound(pageResult.getContent());
             }
+
+            PaginatedResult<Model> paginated = new PaginatedResult<>(
+                    pageResult.getContent(),
+                    page,
+                    perPage,
+                    pageResult.getTotalElements()
+            );
+
+            return result.entityFound(paginated);
+        } catch (Exception ex) {
+            return result.entityNotFound(ex.getMessage());
         }
-
-        return result.entityFound(repository.findAllByIsDeletedFalse());
     }
 
     @Operation(

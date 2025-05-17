@@ -24,11 +24,11 @@ public class Company extends CodeNameEntity {
     @Schema(description = "The manager of the company.", example = "John Doe")
     private Employee manager;
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Department> departments;
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "company")
     private List<Employee> employees;
 }
