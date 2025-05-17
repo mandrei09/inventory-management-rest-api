@@ -10,16 +10,15 @@ import org.example.project.model.generic.BaseEntity;
 import org.example.project.result.Result;
 import org.example.project.service.generic.BaseService;
 import org.example.project.utils.StatusMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Validated
 @Tag(name = "Base Management", description = "API for managing generic entities")
@@ -29,26 +28,31 @@ public abstract class BaseController
 
     private final BaseService<Model, DtoCreate, DtoUpdate> service;
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
+
     public BaseController(BaseService<Model, DtoCreate, DtoUpdate> service) {
         this.service = service;
     }
 
     @Operation(summary = "Get all entities by filters", description = "Retrieve a list of entities filtered by the specified parameters.")
     @GetMapping("/all")
-    public ResponseEntity<?> findByFiltersAndPagination(@RequestParam Map<String, String> allParams) {
+    public ResponseEntity<?> find(@RequestParam Map<String, String> allParams) {
         Integer page = allParams.containsKey("page") ? Integer.parseInt(allParams.get("page")) : null;
         Integer perPage = allParams.containsKey("perPage") ? Integer.parseInt(allParams.get("perPage")) : null;
+        String sortBy = allParams.getOrDefault("sortBy", null);
+        String sortDirection = allParams.getOrDefault("sortDirection", "asc");
 
         Map<String, String> filters = new HashMap<>(allParams);
-        filters.remove("page");
-        filters.remove("perPage");
+        filters.keySet().removeAll(Set.of("page", "perPage", "sortBy", "sortDirection"));
 
-        Result<?> result = service.findEntitiesByFilters(filters, page, perPage);
+        Result<?> result = service.findEntities(filters, page, perPage, sortBy, sortDirection);
 
         if (result != null && result.isSuccess()) {
+            logger.info("Entities retrieved successfully.");
             return ResponseEntity.ok(result.getObject());
         }
 
+        logger.error("Error retrieving entities.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -60,9 +64,12 @@ public abstract class BaseController
         Result<Model> result = service.findById(entityId);
 
         if(result != null && result.isSuccess()) {
+            logger.info("Entity of ClassType " + result.getObject().getClass().getSimpleName() + " retrieved successfully.");
             return ResponseEntity.ok()
                     .body(result.getObject());
         }
+
+        logger.error("Error retrieving entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -79,8 +86,11 @@ public abstract class BaseController
                     .buildAndExpand(result.getObject().getId())
                     .toUri();
 
+            logger.info("Entity of classtype " + result.getObject().getClass().getSimpleName() + " created successfully.");
             return ResponseEntity.created(uri).body(result.getObject());
         }
+
+        logger.error("Error creating entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -97,8 +107,11 @@ public abstract class BaseController
                     .buildAndExpand(result.getObject().get(0).getId())
                     .toUri();
 
+            logger.info("Entities of classtype " + result.getObject().get(0).getClass().getSimpleName() + " created successfully.");
             return ResponseEntity.created(uri).body(result.getObject());
         }
+
+        logger.error("Error creating entities.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -111,9 +124,12 @@ public abstract class BaseController
         Result<Model> result = service.update(entityId, dto);
 
         if (result != null && result.isSuccess()) {
+            logger.info("Entity of classtype " + result.getObject().getClass().getSimpleName() + " updated successfully.");
             return ResponseEntity.ok()
                     .body(result.getObject());
         }
+
+        logger.error("Error updating entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -124,9 +140,12 @@ public abstract class BaseController
         Result<Model> result = service.softDelete(entityId);
 
         if (result != null && result.isSuccess()) {
+            logger.info("Entity of classtype " + result.getObject().getClass().getSimpleName() + " soft deleted successfully.");
             return ResponseEntity.ok()
                     .body(result.getObject());
         }
+
+        logger.error("Error soft deleting entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -137,9 +156,12 @@ public abstract class BaseController
         Result<Model> result = service.delete(entityId);
 
         if (result != null && result.isSuccess()) {
+            logger.info("Entity of classtype " + result.getObject().getClass().getSimpleName() + " deleted successfully.");
             return ResponseEntity.ok()
                     .body(StatusMessages.entityDeleted(result.getObject().getClass().getSimpleName()));
         }
+
+        logger.error("Error deleting entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }
@@ -150,9 +172,12 @@ public abstract class BaseController
         Result<Integer> result = service.cleanUp(dateBefore);
 
         if (result != null && result.isSuccess()) {
+            logger.info("Entity cleanup successful.");
             return ResponseEntity.ok()
                     .body(StatusMessages.entitiesDeleted(result.getObject(), "entities"));
         }
+
+        logger.error("Error cleanup entity.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(result != null ? result : StatusMessages.UNKNOWN_ERROR);
     }

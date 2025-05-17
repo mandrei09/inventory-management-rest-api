@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -46,12 +47,17 @@ public abstract class BaseService
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters")
             }
     )
-    public Result<?> findEntitiesByFilters(Map<String, String> filters, Integer page, Integer perPage) {
+    public Result<?> findEntities(Map<String, String> filters, Integer page, Integer perPage, String sortBy, String sortDirection) {
         Result<Object> result = new Result<>();
 
         try {
+            Sort sort = Sort.unsorted();
+            if (sortBy != null && !sortBy.isBlank()) {
+                sort = Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+            }
+
             Pageable pageable = (page != null && perPage != null)
-                    ? PageRequest.of(page - 1, perPage)
+                    ? PageRequest.of(page - 1, perPage, sort)
                     : Pageable.unpaged();
 
             Specification<Model> spec = Specification.where(GenericSpecification.getQueryableAnd(filters));
