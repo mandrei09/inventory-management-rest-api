@@ -27,7 +27,7 @@ public class Department extends CodeNameEntity {
     @Schema(description = "The company to which this department belongs.", example = "TechCorp")
     private Company company;
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Division> divisions;
 }

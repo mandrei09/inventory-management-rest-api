@@ -36,14 +36,12 @@ public abstract class BaseController
 
     @Operation(summary = "Get all entities by filters", description = "Retrieve a list of entities filtered by the specified parameters.")
     @GetMapping("/all")
-    public ResponseEntity<?> find(@RequestParam Map<String, String> allParams) {
-        Integer page = allParams.containsKey("page") ? Integer.parseInt(allParams.get("page")) : null;
-        Integer perPage = allParams.containsKey("perPage") ? Integer.parseInt(allParams.get("perPage")) : null;
-        String sortBy = allParams.getOrDefault("sortBy", null);
-        String sortDirection = allParams.getOrDefault("sortDirection", "asc");
-
-        Map<String, String> filters = new HashMap<>(allParams);
-        filters.keySet().removeAll(Set.of("page", "perPage", "sortBy", "sortDirection"));
+    public ResponseEntity<?> find(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer perPage,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            @RequestBody(required = false) Map<String, String> filters) {
 
         Result<?> result = service.findEntities(filters, page, perPage, sortBy, sortDirection);
 
