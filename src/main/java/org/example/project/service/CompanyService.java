@@ -95,7 +95,13 @@ public class CompanyService extends BaseService<Company, CompanyDtoCreate, Compa
         if(dto.getManagerId() != null) {
             var manager = employeeRepository.findById(dto.getManagerId());
             if(manager != null) {
-                company.setManager(manager);
+                Integer managerCompaniesCount = companyRepository.countAllByManagerId(manager.getId());
+                if (managerCompaniesCount > 0) {
+                    result.entityNotFound(manager.getId(), StatusMessages.MANAGER_EXISTS);
+                }
+                else {
+                    company.setManager(manager);
+                }
             }
             else {
                 result.entityNotFound(dto.getManagerId(), StatusMessages.MANAGER_NOT_FOUND);

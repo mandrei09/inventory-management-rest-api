@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Companies</title>
+    <script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-3">Companies</h2>
+
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/view/companies/new" class="btn btn-success">
+                <i class="fa fa-plus"></i> Create New Company
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered shadow-sm bg-white">
+            <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Manager</th>
+                <th style="width: 150px;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="company : ${companies}">
+                <td th:text="${company.name}"></td>
+                <td th:text="${company.manager.getName()}"></td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/view/companies/{id}/edit(id=${company.id})}" class="btn btn-sm btn-primary">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <form th:action="@{/view/companies/{id}/delete(id=${company.id})}" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fa fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

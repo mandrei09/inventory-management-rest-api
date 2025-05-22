@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Company</title>
+  <script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+  <script src="/webjars/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/webjars/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Create Company</h3>
+
+          <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+          <form th:action="@{/view/companies}" method="post" th:object="${company}">
+            <div class="mb-3">
+              <label for="code" class="form-label">Code</label>
+              <input type="text" id="code" th:field="*{code}" class="form-control" placeholder="Company code" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Company name" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee" class="form-label">Select Employee</label>
+              <select id="employee" th:field="*{managerId}" class="form-select">
+                <option value="" disabled selected>Choose an employee</option>
+                <option th:each="employee : ${employees}"
+                        th:value="${employee.id}"
+                        th:text="${employee.getEmail()}">
+                </option>
+              </select>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">
+                <i class="fa fa-plus"></i> Create
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <a href="/view/companies" class="btn btn-link">
+          <i class="fa fa-arrow-left"></i> Back to list
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

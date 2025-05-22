@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Employees</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container py-4">
+    <h2>Employees</h2>
+    <a href="/view/employees/new" class="btn btn-success mb-3">Create New</a>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Manager</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${employees}">
+            <td th:text="${e.name + ' ' + e.lastName}"></td>
+            <td th:text="${e.email}"></td>
+            <td th:text="${e.company?.name}"></td>
+            <td th:text="${e.manager?.name}"></td>
+            <td>
+                <a th:href="@{/view/employees/{id}/edit(id=${e.id})}" class="btn btn-primary btn-sm">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
